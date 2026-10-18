@@ -146,6 +146,14 @@ nav.tabs button:not(.active):hover{color:var(--text);}
   font-size:30px;line-height:2.1;letter-spacing:1px;min-height:150px;box-shadow:var(--shadow);
   word-break:break-word;
 }
+.typebox .wd{display:inline-block;white-space:nowrap;}
+.typebox.long{max-height:250px;overflow:hidden;position:relative;padding:14px 30px;line-height:1.9;}
+.typebox.en{font-family:'Hind Siliguri',sans-serif;font-size:26px;letter-spacing:0;line-height:2;}
+.typebox.en.long{max-height:190px;}
+.typebox.en .tk{margin:0;padding:0;border-bottom-width:2px;border-color:transparent;}
+.typebox.en .tk.pending{color:#3b3420a0;}
+.typebox.en .tk.space{width:12px;}
+@media(max-width:600px){.typebox{font-size:22px;padding:20px 16px;}.typebox.en{font-size:20px;}}
 .tk{position:relative;display:inline-block;padding:0 1px;border-bottom:3px solid rgba(0,0,0,0.15);margin:0 1px;}
 .tk.pending{color:#3b342055;border-color:rgba(0,0,0,0.15);}
 .tk.correct{color:#1c5e3e;border-color:var(--green);}
@@ -603,15 +611,17 @@ function bindKeyboardClicks(container, onVirtualKey){
    ৮) TYPING SCREEN (shared by lessons + game) rendering pieces
    ========================================================================= */
 function renderTypebox(session){
-  let html='';
+  let html='<span class="wd">';
   session.chars.forEach((c,i)=>{
+    if(c.key===' ') html+='</span>';
     let cls='tk '+c.state;
     if(c.key===' ') cls+=' space';
     if(i===session.pos) cls+=' current';
     const shown = c.char===' ' ? '\u00A0\u00A0' : (c.char||'\u00A0');
     html += `<span class="${cls}">${shown}</span>`;
+    if(c.key===' ') html+='<span class="wd">';
   });
-  return html;
+  return html+'</span>';
 }
 function nextKeyHint(session){
   const cur = session.currentToken();
@@ -712,7 +722,14 @@ function refreshTypingUI(){
   const session = state.session; if(!session) return;
   const sb=document.getElementById('statbarWrap'); if(sb) sb.innerHTML = statBarHTML(session);
   const tl=document.getElementById('timerLabel'); if(tl && state.testEnd) tl.textContent = fmtTime(Math.max(0,Math.ceil((state.testEnd-Date.now())/1000)));
-  const tb=document.getElementById('typebox'); if(tb) tb.innerHTML = renderTypebox(session);
+  const tb=document.getElementById('typebox');
+  if(tb){
+    tb.innerHTML = renderTypebox(session);
+    tb.classList.toggle('en', session.lang==='en');
+    tb.classList.toggle('long', session.chars.length>160);
+    const cur=tb.querySelector('.tk.current');
+    if(cur && tb.classList.contains('long')) tb.scrollTop = Math.max(0, cur.offsetTop - 10 - parseFloat(getComputedStyle(tb).lineHeight));
+  }
   const nk=document.getElementById('nextHint'); if(nk) nk.innerHTML = nextKeyHint(session);
   const pf=document.getElementById('progFill'); if(pf) pf.style.width = Math.round(session.progress()*100)+'%';
   const ef=document.getElementById('energyFill'); if(ef) ef.style.width = Math.max(6,100-session.wrong*100/Math.max(6,session.correct+session.wrong))+'%';
