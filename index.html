@@ -292,6 +292,15 @@ body.lang-en .brand .mark{font-family:'Hind Siliguri',sans-serif;font-weight:700
 .fleg{display:inline-flex;align-items:center;gap:6px;color:var(--text-dim);}
 .fleg .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
 @media(max-width:760px){.langswitch button{padding:5px 8px;font-size:12px;}}
+.sel{background:var(--bg3);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-family:inherit;font-size:14px;max-width:100%;flex:1;min-width:220px;}
+.passprev{background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:15px;line-height:1.8;color:var(--text-dim);margin:0 0 14px;max-height:130px;overflow:auto;}
+/* বাংলা: অক্ষর জোড়া লেগে থাকুক (যুক্তাক্ষর ও কার ঠিকভাবে দেখাতে) */
+.typebox:not(.en) .tk{display:inline;padding:0;margin:0;border:none;border-radius:0;}
+.typebox:not(.en) .tk.space{display:inline-block;width:14px;}
+.typebox:not(.en) .tk.pending{color:#3b3420a8;}
+.typebox:not(.en) .tk.current{background:rgba(227,178,60,0.45);box-shadow:0 3px 0 var(--gold);}
+.typebox:not(.en) .tk.current::after{display:none;}
+.typebox:not(.en) .tk.wrong{background:rgba(226,84,75,0.22);}
 </style>
 </head>
 <body>
@@ -1227,13 +1236,7 @@ function enTokens(text){
   return text.split('').map(ch=> ch===' ' ? {key:' ',layer:'space',char:' '} : Object.assign({char:ch}, EN_REVERSE[ch]||{key:ch,layer:'base'}));
 }
 const EN_WORDS = ('the be to of and a in that have it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us home water room mother area money story fact month lot right study book eye job word business issue side kind head house service friend father power hour game line end member law car city community name team minute idea kid body information school face others level office door health person art war history party result change morning reason research girl guy moment air teacher force education').split(' ');
-const EN_PASSAGES = [
-  'Practice makes a person perfect. Type every day for a few minutes and your speed will grow slowly but surely.',
-  'The quick brown fox jumps over the lazy dog. This sentence uses every letter of the English alphabet.',
-  'Good typing starts with good posture. Keep your back straight, your wrists relaxed and your eyes on the screen.',
-  'Accuracy comes first and speed comes later. A fast typist who makes many mistakes is slower than a careful one.',
-  'Bangladesh is a land of rivers, green fields and friendly people. Its language, Bangla, is spoken by millions around the world.'
-];
+
 const BN_EXTRA = [['jfu','কাজ'],['lfm','দাম'],['ovm','গরম'],['kfvf','তারা'],['Hfv','ভার'],['nfu','সাজ']];
 function bnWordPool(){ const all=[]; LESSONS.forEach(l=>l.words.forEach(w=>all.push(w))); BN_EXTRA.forEach(w=>all.push(w)); return all; }
 function randomFrom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
@@ -1250,7 +1253,54 @@ function stopTimers(){
 /* =========================================================================
    ১২) টাইপিং টেস্ট — সময়ভিত্তিক ও শব্দভিত্তিক
    ========================================================================= */
-const TEST = { lang:'bn', mode:'time', duration:60, words:25 };
+/* ---- অনুচ্ছেদ: বিখ্যাত সাহিত্য (পাবলিক ডোমেইন) ও সব কী-কভার করা বাক্য ---- */
+const EN_PASSAGES = [
+  { title:'All keys — pangrams', src:'Every letter of the alphabet',
+    text:'The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs! How vexingly quick daft zebras jump; sphinx of black quartz, judge my vow.' },
+  { title:'Numbers & symbols', src:'Every number and common symbols',
+    text:'In 1971, about 75 million people lived here; by 2026 the number was over 170 million (an increase of 120%). Call 0123-456-789 or write to "info@example.com" - it costs $0 & takes 5 minutes!' },
+  { title:'Pride and Prejudice', src:'Jane Austen, 1813',
+    text:'It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families.' },
+  { title:'A Tale of Two Cities', src:'Charles Dickens, 1859',
+    text:'It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair.' },
+  { title:'Moby-Dick', src:'Herman Melville, 1851',
+    text:'Call me Ishmael. Some years ago, never mind how long precisely, having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world.' },
+  { title:'Alice in Wonderland', src:'Lewis Carroll, 1865',
+    text:'Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do: once or twice she had peeped into the book her sister was reading, but it had no pictures or conversations in it, "and what is the use of a book," thought Alice, "without pictures or conversations?"' },
+  { title:'Good habits', src:'Practice sentences',
+    text:'Practice makes a person perfect. Type every day for a few minutes and your speed will grow slowly but surely. Keep your back straight, your wrists relaxed and your eyes on the screen. Accuracy comes first and speed comes later.' },
+];
+const BN_PASSAGES = [
+  { title:'সব কী — পূর্ণ বর্ণমালা অনুশীলন', src:'বিজয় কীবোর্ডের প্রায় সব বোতাম',
+    text:'ঝড়ের রাতে ঢাকার পথে এক ক্ষুধার্ত বৃদ্ধ ঠাকুরমা ঘোড়ায় চড়ে গঞ্জে যাচ্ছিলেন; ঢোঁড়া সাপ, ঊর্ধ্বমুখী ঈগল আর ঐরাবত দেখে তিনি থমকে দাঁড়ালেন। হঠাৎ ছায়ামূর্তি ভেসে উঠল। দুঃখী ঋষি বললেন, "ভয় নেই, সৌভাগ্য আসবে।" আষাঢ়ের রঙিন সন্ধ্যায় সংগীত শুনে তাঁর প্রাণ জুড়াল, কারণ শৈশবের ঔদার্য তৈরি করেছিল ওঁর মন।' },
+  { title:'সংখ্যা ও যতিচিহ্ন', src:'সব সংখ্যা ও চিহ্ন',
+    text:'১৯৭১ সালের ১৬ ডিসেম্বর আমরা বিজয় অর্জন করি। ২০২৬ সালে দেশের জনসংখ্যা প্রায় ১৭ কোটি ৫০ লাখ; সাক্ষরতার হার ৭৮% এর বেশি। প্রশ্ন: আপনি কি সপ্তাহে ৪ দিন, প্রতিদিন ৩০ মিনিট অনুশীলন করেন? উত্তর হ্যাঁ হলে অভিনন্দন!' },
+  { title:'আমার সোনার বাংলা', src:'রবীন্দ্রনাথ ঠাকুর',
+    text:'আমার সোনার বাংলা, আমি তোমায় ভালোবাসি। চিরদিন তোমার আকাশ, তোমার বাতাস, আমার প্রাণে বাজায় বাঁশি। ও মা, ফাগুনে তোর আমের বনে ঘ্রাণে পাগল করে, মরি হায়, হায় রে।' },
+  { title:'একলা চলো রে', src:'রবীন্দ্রনাথ ঠাকুর',
+    text:'যদি তোর ডাক শুনে কেউ না আসে তবে একলা চলো রে। যদি কেউ কথা না কয়, ওরে ওরে ও অভাগা, যদি সবাই থাকে মুখ ফিরায়ে সবাই করে ভয়, তবে পরান খুলে ও তুই মুখ ফুটে তোর মনের কথা একলা বলো রে।' },
+  { title:'আবার আসিব ফিরে', src:'জীবনানন্দ দাশ',
+    text:'আবার আসিব ফিরে ধানসিড়িটির তীরে, এই বাংলায়; হয়তো মানুষ নয়, হয়তো বা শঙ্খচিল শালিখের বেশে; হয়তো ভোরের কাক হয়ে এই কার্তিকের নবান্নের দেশে কুয়াশার বুকে ভেসে একদিন আসিব এ কাঁঠাল ছায়ায়।' },
+  { title:'দেবদাস', src:'শরৎচন্দ্র চট্টোপাধ্যায়',
+    text:'একদিন বৈশাখের দুপুরবেলায় রৌদ্রের আর অন্ত ছিল না, উত্তাপেরও সীমা ছিল না। ঠিক সেই সময়টিতে মুখুয্যেদের দেবদাস পাঠশালা-ঘরের এক কোণে ছেঁড়া মাদুরের উপর বসিয়া, শ্লেট হাতে লইয়া চোখ চাহিয়া, বুজিয়া, পা ছড়াইয়া, হাই তুলিয়া, অবশেষে হঠাৎ খুব চিন্তাশীল হইয়া উঠিল।' },
+  { title:'সুন্দর বাক্য', src:'হাতের লেখা ও টাইপ অনুশীলনের বাক্য',
+    text:'সততাই সর্বোৎকৃষ্ট পন্থা। পরিশ্রম সৌভাগ্যের প্রসূতি। জ্ঞানই শক্তি, আর শিক্ষাই জাতির মেরুদণ্ড। সময় ও স্রোত কারও জন্য অপেক্ষা করে না। ধৈর্য ধরে প্রতিদিন একটু একটু অনুশীলন করলে একদিন তুমিই হবে সেরা।' },
+];
+// ইউনিকোড বাংলা লেখা → বিজয় কী-টোকেন (সবচেয়ে লম্বা মিল আগে)
+const BN_REVERSE = (()=>{ const m={}; Object.entries(KEYMAP).forEach(([k,v])=>{ ['altgr','shift','base'].forEach(layer=>{ if(v[layer] && (!m[v[layer]] || layer==='base' || (layer==='shift' && m[v[layer]].layer==='altgr'))) m[v[layer]]={key:k,layer}; }); }); return m; })();
+function bnTokens(text){
+  const out=[]; let i=0;
+  while(i<text.length){
+    if(text[i]===' '){ out.push({key:' ',layer:'space',char:' '}); i++; continue; }
+    let hit=null;
+    for(const len of [2,1]){ const sub=text.substr(i,len); if(sub.length===len && BN_REVERSE[sub]){ hit=sub; break; } }
+    if(!hit){ i++; continue; }  // কীবোর্ডে নেই এমন চিহ্ন বাদ
+    out.push(Object.assign({char:hit}, BN_REVERSE[hit])); i+=hit.length;
+  }
+  return out;
+}
+
+const TEST = { mode:'time', duration:60, words:25, passage:{bn:-1,en:-1} };
 function optGroup(name, cur, opts){
   return `<div class="seg" data-opt="${name}">${opts.map(([v,l])=>`<button class="${String(cur)===String(v)?'on':''}" data-val="${v}">${l}</button>`).join('')}</div>`;
 }
@@ -1260,10 +1310,17 @@ function screenTestIntro(){
   <h2 class="section-title">${L('টাইপিং টেস্ট — বাংলা (বিজয় ৫২)','Typing Test — English')}</h2>
   <p class="section-sub">${L('টেস্টের ধরন বেছে নিন। ইংরেজিতে টেস্ট দিতে ওপরের মেনু থেকে ভাষা EN করুন। ফলাফল পরিসংখ্যান পাতায় সংরক্ষিত হবে।','Choose a test type. To take the test in Bangla, switch the language to বাংলা in the top menu. Results are saved on the Stats page.')}</p>
   <div class="card testsetup">
-    <div class="optrow"><label>${L('টেস্টের ধরন','Test type')}</label>${optGroup('mode',TEST.mode,[['time',L('⏱ সময়ভিত্তিক','⏱ Timed')],['words',en?'📄 Paragraph':'📄 শব্দভিত্তিক']])}</div>
+    <div class="optrow"><label>${L('টেস্টের ধরন','Test type')}</label>${optGroup('mode',TEST.mode,[['time',L('⏱ সময়ভিত্তিক','⏱ Timed')],['words',L('📄 অনুচ্ছেদ/শব্দভিত্তিক','📄 Paragraph')]])}</div>
     ${TEST.mode==='time'
       ? `<div class="optrow"><label>${L('সময়','Duration')}</label>${optGroup('duration',TEST.duration,[[60,L('১ মিনিট','1 min')],[120,L('২ মিনিট','2 min')],[300,L('৫ মিনিট','5 min')]])}</div>`
-      : (en ? '' : `<div class="optrow"><label>দৈর্ঘ্য</label>${optGroup('words',TEST.words,[[15,'ছোট'],[25,'মাঝারি'],[50,'বড়']])}</div>`)}
+      : (TEST.passage[state.lang]<0 ? `<div class="optrow"><label>${L('দৈর্ঘ্য','Length')}</label>${optGroup('words',TEST.words,[[15,L('ছোট','Short')],[25,L('মাঝারি','Medium')],[50,L('বড়','Long')]])}</div>` : '')}
+    <div class="optrow"><label>${L('লেখা','Text')}</label>
+      <select id="passageSel" class="sel">
+        <option value="-1" ${TEST.passage[state.lang]<0?'selected':''}>${L('এলোমেলো শব্দ','Random words')}</option>
+        ${passageList().map((p,i)=>`<option value="${i}" ${TEST.passage[state.lang]===i?'selected':''}>${p.title} — ${p.src}</option>`).join('')}
+      </select>
+    </div>
+    ${TEST.passage[state.lang]>=0 ? `<div class="passprev ${en?'enfont':''}">${passageList()[TEST.passage[state.lang]].text}</div>` : ''}
     <p class="muted" style="font-size:13.5px;margin:6px 0 18px;">${TEST.mode==='time'
       ? L('নির্দিষ্ট সময়ের মধ্যে যত বেশি সম্ভব সঠিকভাবে টাইপ করুন। প্রথম কী চাপার সাথে সাথে সময় শুরু হবে।','Type as much as you can, as accurately as you can, before time runs out. The timer starts with your first key press.')
       : L('নির্দিষ্ট সংখ্যক শব্দ টাইপ করুন — কত দ্রুত ও নির্ভুলভাবে শেষ করতে পারেন দেখুন।','Type a complete paragraph — see how fast and accurately you can finish it.')}</p>
@@ -1275,19 +1332,31 @@ function bindTestIntro(){
     const k=b.parentElement.getAttribute('data-opt'); const v=b.getAttribute('data-val');
     TEST[k] = (k==='duration'||k==='words') ? parseInt(v) : v; render();
   }));
+  const ps=document.getElementById('passageSel');
+  if(ps) ps.addEventListener('change',()=>{ TEST.passage[state.lang]=parseInt(ps.value); render(); });
   document.getElementById('startTestBtn').addEventListener('click', startTest);
 }
+function passageList(){ return state.lang==='en' ? EN_PASSAGES : BN_PASSAGES; }
 function buildTestItems(){
-  if(state.lang==='en'){
-    if(TEST.mode==='words'){ return randomFrom(EN_PASSAGES).split(' ').map(w=>({tokens:enTokens(w)})); }
-    const out=[]; for(let i=0;i<TEST.duration*2;i++) out.push({tokens:enTokens(randomFrom(EN_WORDS))}); return out;
+  const en = state.lang==='en';
+  const toItems = text => text.split(' ').filter(Boolean).map(w=>({tokens: en ? enTokens(w) : bnTokens(w)}));
+  const pi = TEST.passage[state.lang];
+  if(pi>=0){
+    const text = passageList()[pi].text;
+    if(TEST.mode==='words') return toItems(text);
+    let items=[]; while(items.length < TEST.duration*1.5) items = items.concat(toItems(text)); return items;
+  }
+  if(en){
+    const n = TEST.mode==='words' ? TEST.words : TEST.duration*2;
+    const out=[]; for(let i=0;i<n;i++) out.push({tokens:enTokens(randomFrom(EN_WORDS))}); return out;
   }
   const pool=bnWordPool(); const n = TEST.mode==='words' ? TEST.words : TEST.duration*1.5;
   const out=[]; for(let i=0;i<n;i++){ const w=randomFrom(pool); out.push({tokens:parseCode(w[0]), gloss:w[1]}); } return out;
 }
 function startTest(){
   const lang=state.lang;
-  const label = L('বাংলা টেস্ট · ','English test · ') + (TEST.mode==='time' ? fmtTime(TEST.duration)+L(' মিনিট',' min') : L('শব্দভিত্তিক','Paragraph'));
+  const pi=TEST.passage[state.lang];
+  const label = L('বাংলা টেস্ট · ','English test · ') + (TEST.mode==='time' ? fmtTime(TEST.duration)+L(' মিনিট',' min') : L('অনুচ্ছেদ','Paragraph')) + (pi>=0 ? ' · '+passageList()[pi].title : '');
   state.roundLabel = label;
   state.session = new TypingSession(buildTestItems(), {
     lang,
