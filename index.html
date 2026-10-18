@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>বিজয় শিখি — বিজয় ৫২ টাইপিং শেখার প্ল্যাটফর্ম by Morjina</title>
+<title>টাইপ শিখি — বাংলা (বিজয় ৫২) ও ইংরেজি টাইপিং শেখার প্ল্যাটফর্ম</title>
+<meta name="description" content="বিজয় ৫২ বাংলা ও ইংরেজি টাইপিং শিখুন, টাইপিং টেস্ট দিন এবং গেম খেলে গতি বাড়ান।">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -244,6 +245,35 @@ nav.tabs button:not(.active):hover{color:var(--text);}
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;padding:4px 14px;background:var(--bg2);margin-bottom:20px;}
 
 footer.pagefoot{text-align:center;color:var(--text-dim);font-size:12.5px;padding:40px 0 10px;}
+/* ---------- test & game ---------- */
+.testsetup{max-width:720px;}
+.optrow{display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap;}
+.optrow label{width:110px;color:var(--text-dim);font-size:14px;font-weight:600;}
+.seg{display:inline-flex;gap:4px;background:var(--bg3);border:1px solid var(--line);border-radius:999px;padding:4px;flex-wrap:wrap;}
+.seg button{border:none;background:transparent;color:var(--text-dim);padding:8px 16px;border-radius:999px;font-size:14px;font-weight:600;}
+.seg button.on{background:var(--gold);color:var(--ink);}
+.timer{color:var(--gold);font-size:18px;font-variant-numeric:tabular-nums;}
+.key .base.enkey{font-family:'Hind Siliguri',sans-serif;font-size:15px;font-weight:600;}
+.arc-hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
+.arc-hud .statchip{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:6px 14px;text-align:center;}
+.arc-hud .statchip b{display:block;color:var(--gold);font-size:18px;}
+.arc-hud .statchip span{font-size:11px;color:var(--text-dim);}
+.arena{position:relative;height:420px;overflow:hidden;border-radius:16px;border:1px solid var(--line);
+  background:linear-gradient(180deg,#0b1a2a 0%,#10283a 55%,#173a2c 100%);box-shadow:var(--shadow);}
+.arena .ground{position:absolute;left:0;right:0;bottom:0;height:30px;background:repeating-linear-gradient(90deg,#2d5a3e 0 18px,#27503a 18px 36px);border-top:2px solid var(--gold-dim);}
+.fword{position:absolute;padding:5px 12px;border-radius:10px;background:rgba(244,239,221,0.95);color:var(--ink);
+  font-family:'Tiro Bangla',serif;font-size:20px;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.35);transition:transform .15s,opacity .3s;}
+.fword.en{font-family:'Hind Siliguri',sans-serif;font-weight:600;font-size:18px;}
+.fword span.hit{color:var(--green);}
+.fword.target{box-shadow:0 0 0 2px var(--gold),0 0 18px rgba(227,178,60,0.6);z-index:2;}
+.fword.boom{transform:scale(1.5);opacity:0;}
+.fword.miss{background:var(--red);color:#fff;opacity:0;}
+.arc-overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;background:rgba(8,18,15,0.82);z-index:5;padding:20px;}
+.arc-overlay.show{display:flex;}
+.arc-overlay .big{font-family:'Tiro Bangla',serif;font-size:56px;color:var(--gold);}
+.arc-typed{text-align:center;font-family:'Tiro Bangla',serif;font-size:26px;color:var(--gold);min-height:40px;margin-top:10px;}
+@media(max-width:760px){ .arena{height:340px;} nav.tabs{overflow-x:auto;} nav.tabs button{font-size:11.5px;padding:10px 4px;} }
+
 </style>
 </head>
 <body>
@@ -322,7 +352,7 @@ function parseCode(code){
   }
   return tokens;
 }
-function tokenChar(t){ return t.layer==='space' ? ' ' : (KEYMAP[t.key] ? KEYMAP[t.key][t.layer] : ''); }
+function tokenChar(t){ if(t.char!==undefined) return t.char; return t.layer==='space' ? ' ' : (KEYMAP[t.key] ? KEYMAP[t.key][t.layer] : ''); }
 function buildChars(tokens){ return tokens.map(t=>({key:t.key,layer:t.layer,char:tokenChar(t),state:'pending'})); }
 
 /* =========================================================================
@@ -387,6 +417,7 @@ class TypingSession{
     this.onUpdate = opts.onUpdate || function(){};
     this.onComplete = opts.onComplete || function(){};
     this.onMistake = opts.onMistake || function(){};
+    this.lang = opts.lang || 'bn';
   }
   currentToken(){ return this.pos < this.chars.length ? this.chars[this.pos] : null; }
   progress(){ return this.chars.length ? this.pos/this.chars.length : 0; }
@@ -401,6 +432,16 @@ class TypingSession{
     c.state='pending';
     this.onUpdate();
   }
+  inputChar(ch){
+    if(!this.startTime) this.startTime=Date.now();
+    const cur=this.currentToken(); if(!cur) return;
+    if(ch===cur.char){ cur.state='correct'; this.correct++; this.combo++; this.maxCombo=Math.max(this.maxCombo,this.combo); }
+    else{ cur.state='wrong'; this.wrong++; this.combo=0; this.mistakes[cur.char]=(this.mistakes[cur.char]||0)+1; this.onMistake(cur,ch,'en'); }
+    this.pos++;
+    if(this.pos>=this.chars.length){ this.finish(); return; }
+    this.onUpdate();
+  }
+  finish(){ if(this.endTime) return; this.endTime=Date.now(); this.onUpdate(); this.onComplete(this.summary()); }
   input(keyId, layerWanted){
     if(!this.startTime) this.startTime=Date.now();
     const cur=this.currentToken();
@@ -420,12 +461,13 @@ class TypingSession{
       this.onMistake(cur,keyId,layerWanted);
     }
     this.pos++;
-    if(this.pos>=this.chars.length){ this.endTime=Date.now(); this.onUpdate(); this.onComplete(this.summary()); return; }
+    if(this.pos>=this.chars.length){ this.finish(); return; }
     this.onUpdate();
   }
   summary(){
     return { wpm:this.wpm(), accuracy:this.accuracy(), correct:this.correct, wrong:this.wrong,
-      maxCombo:this.maxCombo, timeSec:Math.round((this.endTime-this.startTime)/1000)||0, mistakes:this.mistakes };
+      maxCombo:this.maxCombo, timeSec:Math.round(((this.endTime||Date.now())-(this.startTime||Date.now()))/1000)||0,
+      mistakes:this.lang==='en'?{}:this.mistakes, lang:this.lang };
   }
 }
 
@@ -516,6 +558,15 @@ function renderKeyboard(expected, opts){
       const fi = FINGER[id];
       let active = expected && expected.key===id;
       if(active) cls+=' active';
+      if(opts.lang==='en'){
+        const en=EN_KEYS[id]||[id,''];
+        html += `<div class="${cls}" style="flex:${w}">
+          <div class="fingertip" style="background:${FINGER_COLOR[fi]}"></div>
+          ${/[a-z]/.test(id)?'':`<div class="shift">${en[1]}</div>`}
+          <button data-key="${id}"><span class="base enkey">${/[a-z]/.test(id)?id.toUpperCase():en[0]}</span></button>
+        </div>`;
+        return;
+      }
       const bn = km.base || '';
       const sh = km.shift || '';
       const ag = km.altgr || '';
@@ -542,6 +593,7 @@ function bindKeyboardClicks(container, onVirtualKey){
       const c=btn.getAttribute('data-ctrl');
       if(c==='Shift'){ state.vShift=!state.vShift; state.vAltgr=false; refreshTypingUI(); }
       if(c==='AltGr'){ state.vAltgr=!state.vAltgr; state.vShift=false; refreshTypingUI(); }
+      if(c==='Backspace' && state.screen==='arcadePlay'){ ARC.buffer.pop(); arcPaint(); return; }
       if(c==='Backspace' && state.session){ state.session.backspace(); refreshTypingUI(); }
     });
   });
@@ -564,6 +616,12 @@ function renderTypebox(session){
 function nextKeyHint(session){
   const cur = session.currentToken();
   if(!cur) return '';
+  if(session.lang==='en'){
+    const fi = FINGER[cur.key]!==undefined ? FINGER[cur.key] : 8;
+    const lbl = cur.char===' ' ? 'Space' : ((cur.layer==='shift'?'Shift + ':'') + (/[a-z]/.test(cur.key)?cur.key.toUpperCase():(EN_KEYS[cur.key]||[cur.key])[0]));
+    return `<div class="nextkey-hint"><div class="badge" style="background:${FINGER_COLOR[fi]}">${cur.char===' '?'␣':cur.char}</div>
+      <span><b>${lbl}</b> চাপুন</span><span class="muted" style="margin-left:auto;font-size:12px;">${FINGER_NAME[fi]}</span></div>`;
+  }
   if(cur.key===' '){
     return `<div class="nextkey-hint"><div class="badge" style="background:${FINGER_COLOR[8]}">␣</div>
       <span>স্পেসবার চাপুন</span><span class="arrow">→</span><span class="bnchar">শব্দের মাঝে ফাঁকা</span></div>`;
@@ -596,6 +654,13 @@ function attachPhysicalKeyboard(session, onAny){
     if((e.ctrlKey||e.metaKey) && !isAltGr) return; // let real browser shortcuts through
     if(e.key==='Backspace'){ e.preventDefault(); session.backspace(); onAny(); return; }
     if(e.code==='Tab' || e.code==='Escape') return;
+    if(session.lang==='en'){
+      if(e.key.length!==1) return;
+      e.preventDefault();
+      const before=session.pos; session.inputChar(e.key);
+      if(session.pos>before){ session.chars[before].state==='correct'?sndCorrect():sndWrong(); }
+      onAny(); return;
+    }
     const keyId = CODE_TO_KEY[e.code];
     if(keyId===undefined) return;
     e.preventDefault();
@@ -615,11 +680,17 @@ function attachPhysicalKeyboard(session, onAny){
 }
 function detachPhysicalKeyboard(){ if(activeKeyHandler){ document.removeEventListener('keydown', activeKeyHandler); activeKeyHandler=null; } }
 function handleVirtualKey(keyId){
+  if(state.screen==='arcadePlay'){
+    if(keyId===' ') return;
+    const code = ARC.lang==='en' ? enCharFor(keyId, state.vShift) : (state.vAltgr?'@'+keyId:(state.vShift?keyId.toUpperCase():keyId));
+    state.vShift=false; state.vAltgr=false; arcInput(code); return;
+  }
   const session = state.session; if(!session) return;
   let layer = state.vAltgr ? 'altgr' : (state.vShift ? 'shift' : 'base');
   if(keyId===' ') layer='space';
   const before=session.pos;
-  session.input(keyId, layer);
+  if(session.lang==='en'){ session.inputChar(keyId===' '?' ':enCharFor(keyId, state.vShift)); }
+  else session.input(keyId, layer);
   state.vShift=false; state.vAltgr=false;
   if(session.pos>before){ const st=session.chars[before].state; if(st==='correct') sndCorrect(); else sndWrong(); }
   refreshTypingUI();
@@ -632,6 +703,7 @@ function showMistakeToast(msg){
   showMistakeToast._t = setTimeout(()=>t.classList.remove('show'), 1600);
 }
 function mistakeMsg(cur, typedKey, typedLayer){
+  if(typedLayer==='en') return `ভুল হলো — দরকার ছিল "${cur.char===' '?'Space':cur.char}"`;
   const wantMod = cur.layer==='shift'?'Shift+':(cur.layer==='altgr'?'AltGr+':'');
   return `ভুল হলো — দরকার ছিল ${wantMod}${cur.key.toUpperCase()} (${cur.char})`;
 }
@@ -639,13 +711,14 @@ function mistakeMsg(cur, typedKey, typedLayer){
 function refreshTypingUI(){
   const session = state.session; if(!session) return;
   const sb=document.getElementById('statbarWrap'); if(sb) sb.innerHTML = statBarHTML(session);
+  const tl=document.getElementById('timerLabel'); if(tl && state.testEnd) tl.textContent = fmtTime(Math.max(0,Math.ceil((state.testEnd-Date.now())/1000)));
   const tb=document.getElementById('typebox'); if(tb) tb.innerHTML = renderTypebox(session);
   const nk=document.getElementById('nextHint'); if(nk) nk.innerHTML = nextKeyHint(session);
   const pf=document.getElementById('progFill'); if(pf) pf.style.width = Math.round(session.progress()*100)+'%';
   const ef=document.getElementById('energyFill'); if(ef) ef.style.width = Math.max(6,100-session.wrong*100/Math.max(6,session.correct+session.wrong))+'%';
   const kbHolder=document.getElementById('kbHolder');
   if(kbHolder){
-    kbHolder.innerHTML = renderKeyboard(session.currentToken(), {showAltgr: state.showAltgr});
+    kbHolder.innerHTML = renderKeyboard(session.currentToken(), {showAltgr: state.showAltgr, lang: session.lang});
     bindKeyboardClicks(kbHolder, handleVirtualKey);
   }
 }
@@ -659,19 +732,20 @@ function screenHome(){
   const bestWpm = DB.history.reduce((m,h)=>Math.max(m,h.wpm||0),0);
   return `
   <section class="hero">
-    <div class="eyebrow">বিজয় ৫২ কীবোর্ড শেখার প্ল্যাটফর্ম by morjina</div>
+    <div class="eyebrow">বাংলা (বিজয় ৫২) ও ইংরেজি টাইপিং শেখার প্ল্যাটফর্ম</div>
     <h1 class="display">আঙুলের ডগায় বাংলা — ধাপে ধাপে বিজয় লেআউট শিখুন, তারপর গতি বাড়ান।</h1>
     <p>একদম মৌলিক ধাপ থেকে শুরু — কোন ইংরেজি কী চাপলে কোন বাংলা অক্ষর আসে, কোন আঙুল ব্যবহার করবেন, সব দেখানো হবে সরাসরি কীবোর্ডের ওপর। শেখার পর নিজেকে যাচাই করুন টাইপিং-ফাইট মোডে — গতি, নির্ভুলতা আর ভুল বিশ্লেষণসহ।</p>
     <div class="ctas">
       <button class="btn btn-primary" data-go="lessons">শেখা শুরু করি →</button>
-      <button class="btn btn-ghost" data-go="game">সরাসরি অনুশীলনে যাই</button>
+      <button class="btn btn-ghost" data-go="test">টাইপিং টেস্ট দিই</button>
+      <button class="btn btn-ghost" data-go="arcade">🎮 গেম খেলি</button>
     </div>
   </section>
   <div class="stripbox">
     <div class="stat"><b>${done}/${totalLessons}</b><span>পাঠ সম্পন্ন</span></div>
     <div class="stat"><b>${bestWpm}</b><span>সর্বোচ্চ WPM</span></div>
     <div class="stat"><b>${DB.history.length}</b><span>মোট অনুশীলন সেশন</span></div>
-    <div class="stat"><b>৪</b><span>কীবোর্ড লেয়ার কভার</span></div>
+    <div class="stat"><b>২</b><span>ভাষা — বাংলা ও English</span></div>
   </div>
   <div class="grid cols-3">
     <div class="card feature"><span class="num">০১</span><h3>কী → অক্ষর, চোখের সামনে</h3><p>প্রতিটি ধাপে ভার্চুয়াল কীবোর্ডে ঠিক যে কী চাপতে হবে সেটা আলোকিত হয়ে থাকে, সাথে কোন আঙুল ব্যবহার করবেন তার রং-কোড।</p></div>
@@ -799,7 +873,8 @@ function screenResults(kind, summary, label, onNext){
     <div style="margin-top:26px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button class="btn btn-primary" id="resultNext">${onNext}</button>
       <button class="btn btn-ghost" data-go="lessons">সব পাঠ দেখি</button>
-      <button class="btn btn-ghost" data-go="game">প্র্যাকটিস মোডে যাই</button>
+      <button class="btn btn-ghost" data-go="test">টাইপিং টেস্ট</button>
+      <button class="btn btn-ghost" data-go="arcade">🎮 গেম</button>
     </div>
   </div>`;
 }
@@ -896,13 +971,15 @@ function screenChart(){
    ১০) MAIN RENDER
    ========================================================================= */
 function navHTML(){
-  const tabs=[['home','হোম'],['lessons','শিখুন'],['game','অনুশীলন'],['stats','পরিসংখ্যান'],['chart','চার্ট']];
-  return tabs.map(([id,label])=>`<button class="${state.screen===id?'active':''}" data-go="${id}">${label}</button>`).join('');
+  const tabs=[['home','হোম'],['lessons','শিখুন'],['game','অনুশীলন'],['test','টেস্ট'],['arcade','গেম'],['stats','পরিসংখ্যান'],['chart','চার্ট']];
+  const map={lessonIntro:'lessons',lessonPractice:'lessons',lessonResult:'lessons',gamePlay:'game',gameResult:'game',testPlay:'test',testResult:'test',arcadePlay:'arcade'};
+  const cur=map[state.screen]||state.screen;
+  return tabs.map(([id,label])=>`<button class="${cur===id?'active':''}" data-go="${id}">${label}</button>`).join('');
 }
 function topbarHTML(){
   return `
   <div class="topbar">
-    <div class="brand" data-go="home"><div class="mark">বি</div><div class="name">বিজয় শিখি<small>BIJOY 52 TYPING</small></div></div>
+    <div class="brand" data-go="home"><div class="mark">বি</div><div class="name">টাইপ শিখি<small>BANGLA · ENGLISH TYPING</small></div></div>
     <nav class="tabs">${navHTML()}</nav>
     <div class="topbar-right">
       <button class="iconbtn ${DB.sound?'on':''}" id="soundToggle" title="সাউন্ড">${DB.sound?'🔊':'🔇'}</button>
@@ -912,6 +989,7 @@ function topbarHTML(){
 
 function render(){
   detachPhysicalKeyboard();
+  stopTimers();
   let body='';
   if(state.screen==='home') body=screenHome();
   else if(state.screen==='lessons') body=screenLessons();
@@ -923,9 +1001,14 @@ function render(){
   else if(state.screen==='gameResult') body=screenResults('game', state.lastSummary, 'রাউন্ড ফলাফল', 'নতুন রাউন্ড →');
   else if(state.screen==='stats') body=screenStats();
   else if(state.screen==='chart') body=screenChart();
+  else if(state.screen==='test') body=screenTestIntro();
+  else if(state.screen==='testPlay') body=screenTestPlay();
+  else if(state.screen==='testResult') body=screenResults('test', state.lastSummary, state.roundLabel, 'আবার টেস্ট দিই →');
+  else if(state.screen==='arcade') body=screenArcadeIntro();
+  else if(state.screen==='arcadePlay') body=screenArcadePlay();
 
   document.getElementById('app').innerHTML = topbarHTML() + `<div class="content">${body}</div>` +
-    `<footer class="pagefoot">বিজয় শিখি — মৌলিক থেকে দক্ষতা পর্যন্ত, ধাপে ধাপে বাংলা টাইপিং।</footer>`;
+    `<footer class="pagefoot">© ${new Date().getFullYear()} টাইপ শিখি — বাংলা ও ইংরেজি টাইপিং, মৌলিক থেকে দক্ষতা পর্যন্ত।</footer>`;
 
   bindGlobalNav();
 
@@ -937,7 +1020,11 @@ function render(){
   if(state.screen==='game'){
     document.querySelectorAll('[data-start-game]').forEach(b=>b.addEventListener('click', ()=> startGameRound() ));
   }
-  if(state.screen==='lessonPractice' || state.screen==='gamePlay'){
+  if(state.screen==='test') bindTestIntro();
+  if(state.screen==='testResult') document.getElementById('resultNext').addEventListener('click', ()=> startTest() );
+  if(state.screen==='arcade') bindArcadeIntro();
+  if(state.screen==='arcadePlay') setupArcade();
+  if(state.screen==='lessonPractice' || state.screen==='gamePlay' || state.screen==='testPlay'){
     setupTypingScreen();
   }
   if(state.screen==='lessonResult'){
@@ -1007,6 +1094,271 @@ function setupTypingScreen(){
   attachPhysicalKeyboard(session, refreshTypingUI);
   const at=document.getElementById('altgrToggle');
   if(at) at.addEventListener('click', ()=>{ state.showAltgr=!state.showAltgr; refreshTypingUI(); at.textContent='AltGr চার্ট '+(state.showAltgr?'লুকান':'দেখান'); });
+}
+
+/* =========================================================================
+   ১১) ইংরেজি কীবোর্ড সাপোর্ট
+   ========================================================================= */
+const EN_KEYS = {
+  '`':['`','~'],'1':['1','!'],'2':['2','@'],'3':['3','#'],'4':['4','$'],'5':['5','%'],'6':['6','^'],'7':['7','&'],
+  '8':['8','*'],'9':['9','('],'0':['0',')'],'-':['-','_'],'=':['=','+'],'[':['[','{'],']':[']','}'],'\\':['\\','|'],
+  ';':[';',':'],"'":["'",'"'],',':[',','<'],'.':['.','>'],'/':['/','?']
+};
+'abcdefghijklmnopqrstuvwxyz'.split('').forEach(c=>EN_KEYS[c]=[c,c.toUpperCase()]);
+const EN_REVERSE = {};
+Object.entries(EN_KEYS).forEach(([id,[b,s]])=>{ EN_REVERSE[b]={key:id,layer:'base'}; EN_REVERSE[s]={key:id,layer:'shift'}; });
+function enCharFor(keyId, shift){ const e=EN_KEYS[keyId]; return e ? e[shift?1:0] : ''; }
+function enTokens(text){
+  return text.split('').map(ch=> ch===' ' ? {key:' ',layer:'space',char:' '} : Object.assign({char:ch}, EN_REVERSE[ch]||{key:ch,layer:'base'}));
+}
+const EN_WORDS = ('the be to of and a in that have it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us home water room mother area money story fact month lot right study book eye job word business issue side kind head house service friend father power hour game line end member law car city community name team minute idea kid body information school face others level office door health person art war history party result change morning reason research girl guy moment air teacher force education').split(' ');
+const EN_PASSAGES = [
+  'Practice makes a person perfect. Type every day for a few minutes and your speed will grow slowly but surely.',
+  'The quick brown fox jumps over the lazy dog. This sentence uses every letter of the English alphabet.',
+  'Good typing starts with good posture. Keep your back straight, your wrists relaxed and your eyes on the screen.',
+  'Accuracy comes first and speed comes later. A fast typist who makes many mistakes is slower than a careful one.',
+  'Bangladesh is a land of rivers, green fields and friendly people. Its language, Bangla, is spoken by millions around the world.'
+];
+const BN_EXTRA = [['jfu','কাজ'],['lfm','দাম'],['ovm','গরম'],['kfvf','তারা'],['Hfv','ভার'],['nfu','সাজ']];
+function bnWordPool(){ const all=[]; LESSONS.forEach(l=>l.words.forEach(w=>all.push(w))); BN_EXTRA.forEach(w=>all.push(w)); return all; }
+function randomFrom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function fmtTime(sec){ return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0'); }
+
+let testTimer=null;
+function stopTimers(){
+  if(testTimer){ clearInterval(testTimer); testTimer=null; }
+  state.testEnd=null;
+  if(ARC.raf){ cancelAnimationFrame(ARC.raf); ARC.raf=null; }
+  if(ARC.handler){ document.removeEventListener('keydown', ARC.handler); ARC.handler=null; }
+}
+
+/* =========================================================================
+   ১২) টাইপিং টেস্ট — সময়ভিত্তিক ও শব্দভিত্তিক
+   ========================================================================= */
+const TEST = { lang:'bn', mode:'time', duration:60, words:25 };
+function optGroup(name, cur, opts){
+  return `<div class="seg" data-opt="${name}">${opts.map(([v,l])=>`<button class="${String(cur)===String(v)?'on':''}" data-val="${v}">${l}</button>`).join('')}</div>`;
+}
+function screenTestIntro(){
+  return `
+  <h2 class="section-title">টাইপিং টেস্ট</h2>
+  <p class="section-sub">ভাষা ও টেস্টের ধরন বেছে নিন। বাংলা টেস্ট বিজয় ৫২ লেআউটে, ইংরেজি টেস্ট সাধারণ QWERTY লেআউটে। ফলাফল পরিসংখ্যান পাতায় সংরক্ষিত হবে।</p>
+  <div class="card testsetup">
+    <div class="optrow"><label>ভাষা</label>${optGroup('lang',TEST.lang,[['bn','বাংলা (বিজয়)'],['en','English']])}</div>
+    <div class="optrow"><label>টেস্টের ধরন</label>${optGroup('mode',TEST.mode,[['time','⏱ সময়ভিত্তিক'],['words','📄 শব্দ/অনুচ্ছেদভিত্তিক']])}</div>
+    ${TEST.mode==='time'
+      ? `<div class="optrow"><label>সময়</label>${optGroup('duration',TEST.duration,[[60,'১ মিনিট'],[120,'২ মিনিট'],[300,'৫ মিনিট']])}</div>`
+      : `<div class="optrow"><label>দৈর্ঘ্য</label>${optGroup('words',TEST.words,[[15,'ছোট'],[25,'মাঝারি'],[50,'বড়']])}</div>`}
+    <p class="muted" style="font-size:13.5px;margin:6px 0 18px;">${TEST.mode==='time'
+      ? 'নির্দিষ্ট সময়ের মধ্যে যত বেশি সম্ভব সঠিকভাবে টাইপ করুন। প্রথম কী চাপার সাথে সাথে সময় শুরু হবে।'
+      : (TEST.lang==='en' ? 'একটি সম্পূর্ণ অনুচ্ছেদ টাইপ করুন — কত দ্রুত ও নির্ভুলভাবে শেষ করতে পারেন দেখুন।' : 'নির্দিষ্ট সংখ্যক শব্দ টাইপ করুন — কত দ্রুত ও নির্ভুলভাবে শেষ করতে পারেন দেখুন।')}</p>
+    <button class="btn btn-primary" id="startTestBtn">টেস্ট শুরু করি →</button>
+  </div>`;
+}
+function bindTestIntro(){
+  document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
+    const k=b.parentElement.getAttribute('data-opt'); const v=b.getAttribute('data-val');
+    TEST[k] = (k==='duration'||k==='words') ? parseInt(v) : v; render();
+  }));
+  document.getElementById('startTestBtn').addEventListener('click', startTest);
+}
+function buildTestItems(){
+  if(TEST.lang==='en'){
+    if(TEST.mode==='words'){ return randomFrom(EN_PASSAGES).split(' ').map(w=>({tokens:enTokens(w)})); }
+    const out=[]; for(let i=0;i<TEST.duration*2;i++) out.push({tokens:enTokens(randomFrom(EN_WORDS))}); return out;
+  }
+  const pool=bnWordPool(); const n = TEST.mode==='words' ? TEST.words : TEST.duration*1.5;
+  const out=[]; for(let i=0;i<n;i++){ const w=randomFrom(pool); out.push({tokens:parseCode(w[0]), gloss:w[1]}); } return out;
+}
+function startTest(){
+  const lang=TEST.lang;
+  const label = (lang==='en'?'English':'বাংলা') + ' টেস্ট · ' + (TEST.mode==='time' ? fmtTime(TEST.duration)+' মিনিট' : 'শব্দভিত্তিক');
+  state.roundLabel = label;
+  state.session = new TypingSession(buildTestItems(), {
+    lang,
+    onUpdate: refreshTypingUI,
+    onMistake: (cur,k,layer)=> showMistakeToast(mistakeMsg(cur,k,layer)),
+    onComplete: (summary)=>{
+      sndDone(); recordSession('test', label, summary);
+      state.lastSummary = summary; setTimeout(()=> go('testResult'), 300);
+    }
+  });
+  go('testPlay');
+  if(TEST.mode==='time'){
+    const s=state.session;
+    state.testEnd = null;
+    testTimer = setInterval(()=>{
+      if(!s.startTime){ const tl=document.getElementById('timerLabel'); if(tl) tl.textContent=fmtTime(TEST.duration); return; }
+      if(!state.testEnd) state.testEnd = s.startTime + TEST.duration*1000;
+      refreshTypingUI();
+      if(Date.now()>=state.testEnd){ clearInterval(testTimer); testTimer=null; s.finish(); }
+    }, 250);
+  }
+}
+function screenTestPlay(){
+  const sub = TEST.mode==='time' ? `সময় বাকি: <b id="timerLabel" class="timer">${fmtTime(TEST.duration)}</b>` : 'সম্পূর্ণ লেখাটি টাইপ করুন';
+  return screenTypingShell(state.roundLabel, sub, 'test');
+}
+
+/* =========================================================================
+   ১৩) গেম — শব্দ বৃষ্টি (Word Rain)
+   ========================================================================= */
+const ARC = { lang:'bn', words:[], buffer:[], score:0, lives:5, level:1, destroyed:0, keys:0, good:0, raf:null, handler:null, last:0, spawnAt:0, over:false, paused:false, start:0 };
+function screenArcadeIntro(){
+  const best = (DB.arcadeBest||{});
+  return `
+  <h2 class="section-title">🎮 শব্দ বৃষ্টি — টাইপিং গেম</h2>
+  <p class="section-sub">আকাশ থেকে শব্দ পড়ছে! মাটিতে পড়ার আগেই শব্দটি টাইপ করে ধ্বংস করুন। যত শব্দ ধ্বংস করবেন, লেভেল তত বাড়বে আর শব্দ তত দ্রুত পড়বে। ৫টি শব্দ মাটিতে পড়লে খেলা শেষ।</p>
+  <div class="grid cols-3" style="margin-bottom:24px;">
+    <div class="card feature"><span class="num">⌨️</span><h3>শুধু টাইপ করুন</h3><p>যে শব্দের সাথে আপনার টাইপ মিলবে সেটিই স্বয়ংক্রিয়ভাবে টার্গেট হবে। ভুল কী চাপলে টাইপ রিসেট হবে।</p></div>
+    <div class="card feature"><span class="num">❤️</span><h3>৫টি জীবন</h3><p>প্রতিটি শব্দ মাটিতে পড়লে একটি জীবন কমবে। Esc চেপে খেলা থামাতে পারবেন।</p></div>
+    <div class="card feature"><span class="num">🏆</span><h3>সেরা স্কোর</h3><p>বাংলা: <b style="color:var(--gold)">${best.bn||0}</b> · English: <b style="color:var(--gold)">${best.en||0}</b></p></div>
+  </div>
+  <div class="card testsetup">
+    <div class="optrow"><label>ভাষা</label>${optGroup('lang',ARC.lang,[['bn','বাংলা (বিজয়)'],['en','English']])}</div>
+    <button class="btn btn-primary" id="startArcade" style="margin-top:8px;">খেলা শুরু করি →</button>
+  </div>`;
+}
+function bindArcadeIntro(){
+  document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{ ARC.lang=b.getAttribute('data-val'); render(); }));
+  document.getElementById('startArcade').addEventListener('click', ()=>{ state.session=null; go('arcadePlay'); });
+}
+function screenArcadePlay(){
+  return `
+  <button class="btn btn-ghost" data-go="arcade" style="margin-bottom:14px;">← গেম মেনু</button>
+  <div class="arc-hud">
+    <div class="statchip"><b id="arcScore">0</b><span>স্কোর</span></div>
+    <div class="statchip"><b id="arcLevel">1</b><span>লেভেল</span></div>
+    <div class="statchip"><b id="arcLives">❤️❤️❤️❤️❤️</b><span>জীবন</span></div>
+    <button class="togglebtn" id="arcPause">⏸ বিরতি</button>
+  </div>
+  <div class="arena" id="arena"><div class="ground"></div><div class="arc-overlay" id="arcOverlay"></div></div>
+  <div class="arc-typed" id="arcTyped">&nbsp;</div>
+  <div class="kbwrap"><div id="arcKb"></div></div>`;
+}
+function wordCodes(tokens){ return tokens.map(t=> t.char!==undefined ? t.char : (t.layer==='shift'?t.key.toUpperCase():(t.layer==='altgr'?'@'+t.key:t.key))); }
+function spawnWord(){
+  const arena=document.getElementById('arena'); if(!arena) return;
+  let tokens;
+  if(ARC.lang==='en') tokens=enTokens(randomFrom(EN_WORDS));
+  else tokens=parseCode(randomFrom(bnWordPool())[0]);
+  const chars=tokens.map(t=>t.char!==undefined?t.char:tokenChar(t));
+  const el=document.createElement('div'); el.className='fword'+(ARC.lang==='en'?' en':'');
+  el.innerHTML=chars.map(c=>`<span>${c}</span>`).join('');
+  arena.appendChild(el);
+  const maxX = Math.max(10, arena.clientWidth - 40 - chars.length*18);
+  const w = { tokens, codes:wordCodes(tokens), el, x:10+Math.random()*maxX, y:-30, speed:(18+ARC.level*7)*(0.8+Math.random()*0.4) };
+  el.style.left=w.x+'px'; el.style.top=w.y+'px';
+  ARC.words.push(w);
+}
+function arcTarget(){
+  const b=ARC.buffer; if(!b.length) return null;
+  let best=null;
+  ARC.words.forEach(w=>{ if(b.length<=w.codes.length && b.every((c,i)=>w.codes[i]===c) && (!best || w.y>best.y)) best=w; });
+  return best;
+}
+function arcPaint(){
+  const t=arcTarget();
+  ARC.words.forEach(w=>{
+    const on = w===t;
+    w.el.classList.toggle('target', on);
+    w.el.querySelectorAll('span').forEach((sp,i)=>sp.classList.toggle('hit', on && i<ARC.buffer.length));
+  });
+  const ty=document.getElementById('arcTyped');
+  if(ty) ty.textContent = t ? t.tokens.slice(0,ARC.buffer.length).map(x=>x.char!==undefined?x.char:tokenChar(x)).join('') || ' ' : ' ';
+  const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+  set('arcScore',ARC.score); set('arcLevel',ARC.level); set('arcLives', ARC.lives>0 ? '❤️'.repeat(ARC.lives) : '—');
+  const kb=document.getElementById('arcKb');
+  if(kb){
+    let next=null;
+    if(t) next=t.tokens[ARC.buffer.length];
+    kb.innerHTML=renderKeyboard(next||null,{lang:ARC.lang});
+    bindKeyboardClicks(kb, handleVirtualKey);
+  }
+}
+function arcInput(code){
+  if(ARC.over || ARC.paused) return;
+  ARC.keys++;
+  const nb=[...ARC.buffer, code];
+  const prev=ARC.buffer; ARC.buffer=nb;
+  if(!arcTarget()){
+    // নতুন শব্দের শুরু হিসেবে চেষ্টা
+    ARC.buffer=[code];
+    if(!arcTarget()){ ARC.buffer=prev.length?[]:[]; sndWrong(); arcPaint(); return; }
+  }
+  ARC.good++; sndCorrect();
+  const t=arcTarget();
+  if(t && ARC.buffer.length===t.codes.length){
+    ARC.score += t.codes.length*10*ARC.level; ARC.destroyed++;
+    t.el.classList.add('boom'); setTimeout(()=>t.el.remove(),300);
+    ARC.words=ARC.words.filter(w=>w!==t); ARC.buffer=[];
+    if(ARC.destroyed%8===0){ ARC.level++; sndDone(); }
+  }
+  arcPaint();
+}
+function arcGameOver(){
+  ARC.over=true;
+  const mins=(Date.now()-ARC.start)/60000;
+  const summary={ wpm: mins? Math.round((ARC.good/5)/mins):0, accuracy: ARC.keys?Math.round(ARC.good/ARC.keys*100):100, timeSec:Math.round(mins*60), mistakes:{} };
+  DB.arcadeBest = DB.arcadeBest||{};
+  const isBest = ARC.score > (DB.arcadeBest[ARC.lang]||0);
+  if(isBest) DB.arcadeBest[ARC.lang]=ARC.score;
+  recordSession('arcade', `শব্দ বৃষ্টি (${ARC.lang==='en'?'English':'বাংলা'}) · স্কোর ${ARC.score}`, summary);
+  sndDone();
+  const ov=document.getElementById('arcOverlay');
+  if(ov){ ov.classList.add('show'); ov.innerHTML=`<div><div class="muted">খেলা শেষ</div><div class="big">${ARC.score}</div>
+    <div class="muted">${isBest?'🏆 নতুন সেরা স্কোর!':'স্কোর'} · লেভেল ${ARC.level} · ${ARC.destroyed} শব্দ · ${summary.wpm} WPM · ${summary.accuracy}% নির্ভুল</div>
+    <div style="margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+    <button class="btn btn-primary" id="arcAgain">আবার খেলি</button><button class="btn btn-ghost" data-go="arcade">মেনু</button></div></div>`;
+    document.getElementById('arcAgain').addEventListener('click',()=>go('arcadePlay'));
+    ov.querySelector('[data-go]').addEventListener('click',()=>go('arcade'));
+  }
+}
+function arcTogglePause(){
+  if(ARC.over) return;
+  ARC.paused=!ARC.paused;
+  const ov=document.getElementById('arcOverlay'); const pb=document.getElementById('arcPause');
+  if(pb) pb.textContent = ARC.paused?'▶ চালু':'⏸ বিরতি';
+  if(ov){ ov.classList.toggle('show',ARC.paused); ov.innerHTML = ARC.paused?'<div><div class="big" style="font-size:34px;">বিরতি</div><div class="muted">চালিয়ে যেতে Esc বা ▶ চাপুন</div></div>':''; }
+  if(!ARC.paused) ARC.last=performance.now();
+}
+function setupArcade(){
+  Object.assign(ARC,{words:[],buffer:[],score:0,lives:5,level:1,destroyed:0,keys:0,good:0,over:false,paused:false,start:Date.now(),last:performance.now(),spawnAt:0});
+  document.getElementById('arcPause').addEventListener('click', arcTogglePause);
+  ARC.handler=function(e){
+    if(e.key==='Escape'){ arcTogglePause(); return; }
+    const isAltGr=(e.getModifierState && e.getModifierState('AltGraph')) || (e.ctrlKey && e.altKey);
+    if((e.ctrlKey||e.metaKey) && !isAltGr) return;
+    if(e.key==='Backspace'){ e.preventDefault(); ARC.buffer.pop(); arcPaint(); return; }
+    if(ARC.lang==='en'){
+      if(e.key.length!==1 || e.key===' ') return;
+      e.preventDefault(); arcInput(e.key); return;
+    }
+    const keyId=CODE_TO_KEY[e.code]; if(keyId===undefined || keyId===' ') return;
+    e.preventDefault();
+    arcInput(isAltGr ? '@'+keyId : (e.shiftKey ? keyId.toUpperCase() : keyId));
+  };
+  document.addEventListener('keydown', ARC.handler);
+  arcPaint();
+  function loop(now){
+    ARC.raf=requestAnimationFrame(loop);
+    if(ARC.over || ARC.paused) return;
+    const dt=Math.min(0.1,(now-ARC.last)/1000); ARC.last=now;
+    const arena=document.getElementById('arena'); if(!arena) return;
+    ARC.spawnAt-=dt;
+    if(ARC.spawnAt<=0){ spawnWord(); ARC.spawnAt=Math.max(1.0, 3.2-ARC.level*0.25); arcPaint(); }
+    const floor=arena.clientHeight-34;
+    let lost=false;
+    ARC.words.forEach(w=>{ w.y+=w.speed*dt; w.el.style.top=w.y+'px'; if(w.y>=floor) lost=true; });
+    if(lost){
+      ARC.words.filter(w=>w.y>=floor).forEach(w=>{ ARC.lives--; w.el.classList.add('miss'); setTimeout(()=>w.el.remove(),300); });
+      ARC.words=ARC.words.filter(w=>w.y<floor);
+      if(!arcTarget()) ARC.buffer=[];
+      sndWrong(); arcPaint();
+      if(ARC.lives<=0) arcGameOver();
+    }
+  }
+  ARC.raf=requestAnimationFrame(loop);
 }
 
 /* boot */
