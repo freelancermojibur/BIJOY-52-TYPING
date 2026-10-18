@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>বিজয় শিখি — বিজয় ৫২ টাইপিং শেখার প্ল্যাটফর্ম by Morjina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e211b;
+  --bg2:#132a22;
+  --bg3:#183327;
+  --paper:#f4efdd;
+  --paper2:#eae3cb;
+  --ink:#18231d;
+  --text:#ece7d6;
+  --text-dim:#b9c2b7;
+  --gold:#e3b23c;
+  --gold-dim:#a5822e;
+  --red:#e2544b;
+  --red-dim:#a53f3a;
+  --green:#3fa772;
+  --line:rgba(236,231,214,0.14);
+  --shadow:0 12px 30px rgba(0,0,0,0.35);
+  --radius:14px;
+  --f0:#c9503f;--f1:#d68a3c;--f2:#c7a93d;--f3:#7ea23c;
+  --f4:#3e9b6e;--f5:#3e96a8;--f6:#4c79c4;--f7:#8064c9;--f8:#8d8d8d;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:radial-gradient(1200px 700px at 15% -10%, #163a2c 0%, var(--bg) 55%) fixed;
+  color:var(--text);
+  font-family:'Hind Siliguri', 'Noto Sans Bengali', sans-serif;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.display{font-family:'Tiro Bangla','Hind Siliguri',serif;font-weight:400;}
+a{color:inherit;}
+button{font-family:inherit;cursor:pointer;}
+::selection{background:var(--gold);color:var(--ink);}
+
+/* ---------- layout shell ---------- */
+#app{max-width:1180px;margin:0 auto;padding:0 20px 60px;}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 4px 14px;position:sticky;top:0;z-index:40;
+  background:linear-gradient(var(--bg) 78%, transparent);
+  backdrop-filter:blur(6px);
+}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer;}
+.brand .mark{
+  width:42px;height:42px;border-radius:12px;background:linear-gradient(155deg,var(--gold),#b9862c);
+  display:flex;align-items:center;justify-content:center;color:var(--ink);font-family:'Tiro Bangla',serif;
+  font-size:22px;font-weight:400;box-shadow:var(--shadow);flex-shrink:0;
+}
+.brand .name{font-family:'Tiro Bangla',serif;font-size:22px;letter-spacing:0.5px;}
+.brand .name small{display:block;font-family:'Hind Siliguri';font-size:11.5px;color:var(--text-dim);font-weight:500;letter-spacing:1.5px;}
+nav.tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:4px;}
+nav.tabs button{
+  border:none;background:transparent;color:var(--text-dim);padding:9px 16px;border-radius:999px;
+  font-size:14.5px;font-weight:600;transition:.18s;white-space:nowrap;
+}
+nav.tabs button.active{background:var(--gold);color:var(--ink);}
+nav.tabs button:not(.active):hover{color:var(--text);}
+.iconbtn{border:1px solid var(--line);background:var(--bg2);color:var(--text-dim);width:38px;height:38px;border-radius:10px;font-size:16px;display:flex;align-items:center;justify-content:center;}
+.iconbtn.on{color:var(--gold);border-color:var(--gold-dim);}
+.topbar-right{display:flex;gap:8px;align-items:center;}
+@media(max-width:760px){
+  .brand .name{font-size:18px}
+  nav.tabs{position:fixed;bottom:10px;left:12px;right:12px;justify-content:space-between;box-shadow:var(--shadow);z-index:50;}
+  nav.tabs button{flex:1;padding:10px 6px;font-size:12.5px;}
+  #app{padding-bottom:90px;}
+}
+
+/* ---------- generic ---------- */
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);padding:22px;}
+.card.paper{background:var(--paper);color:var(--ink);border:none;}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--line);padding:4px 12px;border-radius:999px;font-size:12.5px;color:var(--text-dim);font-weight:600;}
+.btn{
+  border:none;border-radius:11px;padding:13px 22px;font-weight:700;font-size:15px;
+  display:inline-flex;align-items:center;gap:8px;transition:.15s;
+}
+.btn-primary{background:var(--gold);color:var(--ink);}
+.btn-primary:hover{background:#eec25a;transform:translateY(-1px);}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text);}
+.btn-ghost:hover{border-color:var(--gold-dim);}
+.btn-red{background:var(--red);color:#2a0e0c;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.grid{display:grid;gap:18px;}
+.grid.cols-3{grid-template-columns:repeat(3,1fr);}
+.grid.cols-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:760px){.grid.cols-3,.grid.cols-2{grid-template-columns:1fr;}}
+.muted{color:var(--text-dim);}
+.section-title{font-size:26px;margin:8px 0 6px;}
+.section-sub{color:var(--text-dim);font-size:15px;margin-bottom:24px;max-width:640px;line-height:1.6;}
+
+/* ---------- HOME ---------- */
+.hero{padding:52px 4px 30px;}
+.hero .eyebrow{color:var(--gold);font-weight:700;font-size:14px;letter-spacing:.5px;margin-bottom:14px;}
+.hero h1{font-size:44px;line-height:1.25;margin:0 0 18px;max-width:760px;}
+.hero p{font-size:17px;color:var(--text-dim);max-width:600px;line-height:1.75;margin-bottom:30px;}
+.hero .ctas{display:flex;gap:12px;flex-wrap:wrap;}
+@media(max-width:600px){.hero h1{font-size:30px}}
+.feature{padding:20px;}
+.feature .num{color:var(--gold);font-family:'Tiro Bangla',serif;font-size:26px;margin-bottom:10px;display:block;}
+.feature h3{font-size:18px;margin:0 0 8px;}
+.feature p{color:var(--text-dim);font-size:14.5px;line-height:1.65;margin:0;}
+.stripbox{display:flex;gap:26px;flex-wrap:wrap;padding:26px 4px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:30px 0;}
+.stripbox .stat b{display:block;font-family:'Tiro Bangla',serif;font-size:30px;color:var(--gold);}
+.stripbox .stat span{color:var(--text-dim);font-size:13px;}
+
+/* ---------- LESSON LIST ---------- */
+.lesson-row{
+  display:flex;align-items:center;gap:16px;padding:18px 20px;border-radius:var(--radius);
+  border:1px solid var(--line);background:var(--bg2);margin-bottom:12px;cursor:pointer;transition:.15s;
+}
+.lesson-row:hover{border-color:var(--gold-dim);}
+.lesson-row.locked{opacity:.45;cursor:not-allowed;}
+.lesson-num{width:44px;height:44px;border-radius:12px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-family:'Tiro Bangla',serif;font-size:19px;flex-shrink:0;}
+.lesson-row.done .lesson-num{background:var(--green);color:#062;}
+.lesson-body{flex:1;min-width:0;}
+.lesson-body h3{margin:0 0 4px;font-size:17px;}
+.lesson-body p{margin:0;color:var(--text-dim);font-size:13.5px;}
+.lesson-keys{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
+.keychip{background:var(--bg3);border:1px solid var(--line);border-radius:6px;padding:2px 7px;font-size:12px;font-weight:700;}
+.lesson-wpm{text-align:right;font-size:12.5px;color:var(--text-dim);white-space:nowrap;}
+.lesson-wpm b{display:block;color:var(--gold);font-size:19px;}
+
+/* ---------- TYPING / PRACTICE ---------- */
+.practice-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:18px;}
+.statbar{display:flex;gap:10px;flex-wrap:wrap;}
+.statchip{background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:8px 16px;min-width:78px;text-align:center;}
+.statchip b{display:block;font-size:20px;font-family:'Tiro Bangla',serif;color:var(--gold);}
+.statchip span{font-size:11px;color:var(--text-dim);}
+.energywrap{margin:6px 0 20px;}
+.energybar{height:10px;border-radius:999px;background:var(--bg3);overflow:hidden;border:1px solid var(--line);}
+.energyfill{height:100%;background:linear-gradient(90deg,var(--gold),#f1cf7c);transition:width .25s;}
+.progressfill{height:100%;background:linear-gradient(90deg,var(--f4),var(--f5));transition:width .25s;}
+.energylabels{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-dim);margin-top:5px;}
+
+.typebox{
+  background:var(--paper);color:var(--ink);border-radius:var(--radius);padding:34px 30px;
+  font-size:30px;line-height:2.1;letter-spacing:1px;min-height:150px;box-shadow:var(--shadow);
+  word-break:break-word;
+}
+.tk{position:relative;display:inline-block;padding:0 1px;border-bottom:3px solid rgba(0,0,0,0.15);margin:0 1px;}
+.tk.pending{color:#3b342055;border-color:rgba(0,0,0,0.15);}
+.tk.correct{color:#1c5e3e;border-color:var(--green);}
+.tk.wrong{color:var(--red);border-color:var(--red);background:rgba(226,84,75,0.12);border-radius:4px;}
+.tk.space{border-color:transparent;width:14px;}
+.tk.current{background:rgba(227,178,60,0.28);border-radius:4px;border-color:var(--gold-dim);}
+.tk.current::after{content:'';position:absolute;left:0;bottom:-3px;width:100%;height:3px;background:var(--gold);animation:blink 1s step-end infinite;}
+@keyframes blink{50%{opacity:0.15}}
+
+.nextkey-hint{
+  display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--line);
+  border-radius:12px;padding:12px 16px;margin:16px 0;font-size:14.5px;
+}
+.nextkey-hint .badge{
+  min-width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:15px;color:#fff;box-shadow:0 3px 8px rgba(0,0,0,0.3);
+}
+.nextkey-hint .arrow{color:var(--text-dim);}
+.nextkey-hint .bnchar{font-family:'Tiro Bangla',serif;font-size:22px;color:var(--gold);}
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%);
+  background:var(--red);color:#fff;padding:11px 22px;border-radius:999px;font-size:14px;font-weight:700;
+  box-shadow:var(--shadow);z-index:80;opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+
+/* ---------- KEYBOARD ---------- */
+.kbwrap{margin-top:22px;}
+.kbtoolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.kbtoolbar .legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--text-dim);}
+.legend .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle;}
+.kb{background:#0a1815;border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow);}
+.kbrow{display:flex;gap:6px;margin-bottom:6px;}
+.kbrow:last-child{margin-bottom:0;}
+.key{
+  flex:1;background:var(--bg2);border:1px solid rgba(236,231,214,0.08);border-bottom:3px solid rgba(0,0,0,0.4);
+  border-radius:8px;min-height:52px;position:relative;display:flex;align-items:flex-end;justify-content:flex-start;
+  padding:4px 6px;transition:.1s;user-select:none;
+}
+.key.ctrl{background:#0e1c17;color:var(--text-dim);font-size:10.5px;align-items:center;justify-content:center;font-weight:600;}
+.key .base{font-family:'Tiro Bangla',serif;font-size:16px;line-height:1;color:var(--text);}
+.key .base.en{font-family:'Hind Siliguri';font-size:12px;color:var(--text-dim);}
+.key .shift{position:absolute;top:4px;right:6px;font-size:12px;color:var(--gold);font-family:'Tiro Bangla',serif;}
+.key .altgr{position:absolute;top:4px;left:6px;font-size:10.5px;color:#7fd7c4;font-family:'Tiro Bangla',serif;}
+.key.active{transform:translateY(1px);box-shadow:0 0 0 2px var(--gold), 0 0 16px rgba(227,178,60,0.55);border-bottom-width:1px;}
+.key.mod-active{box-shadow:0 0 0 2px var(--text);}
+.key.w-space{flex:6;}
+.key.w-tab,.key.w-caps,.key.w-bslash{flex:1.5;}
+.key.w-enter{flex:2;}
+.key.w-shift{flex:2.3;}
+.key.w-bksp{flex:1.7;}
+.key.w-sm{flex:0.9;}
+.fingertip{position:absolute;left:6px;bottom:4px;width:6px;height:6px;border-radius:50%;}
+.kb button{width:100%;height:100%;background:none;border:none;color:inherit;text-align:left;padding:0;}
+
+.togglebtn{display:flex;align-items:center;gap:7px;background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12.5px;color:var(--text-dim);}
+.togglebtn.on{color:var(--gold);border-color:var(--gold-dim);}
+
+/* ---------- lesson info / results ---------- */
+.newkeys-strip{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 20px;}
+.nk-card{background:var(--bg3);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:96px;text-align:center;}
+.nk-card .en{font-weight:800;font-size:13px;color:var(--text-dim);}
+.nk-card .arrowbn{font-family:'Tiro Bangla',serif;font-size:22px;margin:4px 0;color:var(--gold);}
+.nk-card .fname{font-size:10.5px;color:var(--text-dim);}
+.wordlist-preview{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;}
+.wl-chip{background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-family:'Tiro Bangla',serif;font-size:16px;}
+.wl-chip small{display:block;font-family:'Hind Siliguri';font-size:10.5px;color:var(--text-dim);}
+
+.resultcard{text-align:center;padding:40px 20px;}
+.resultcard .big{font-family:'Tiro Bangla',serif;font-size:56px;color:var(--gold);margin:6px 0;}
+.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:26px 0;}
+@media(max-width:600px){.result-grid{grid-template-columns:repeat(2,1fr);}}
+.result-grid .rc{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:16px 8px;}
+.result-grid .rc b{display:block;font-size:22px;color:var(--gold);font-family:'Tiro Bangla',serif;}
+.result-grid .rc span{font-size:11.5px;color:var(--text-dim);}
+.mistake-row{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:11px 15px;margin-bottom:8px;text-align:left;}
+.mistake-row .badge{min-width:30px;height:30px;border-radius:7px;background:var(--red);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.mistake-row .txt{flex:1;font-size:13.5px;}
+.mistake-row .txt b{color:var(--gold);}
+.mistake-row .cnt{font-size:12px;color:var(--text-dim);}
+
+/* ---------- stats ---------- */
+.histrow{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);margin-bottom:8px;font-size:13.5px;}
+.histrow .l{color:var(--text-dim);}
+.barrow{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.barrow .lbl{width:110px;flex-shrink:0;font-size:13px;}
+.barrow .track{flex:1;height:10px;background:var(--bg3);border-radius:999px;overflow:hidden;}
+.barrow .fill{height:100%;background:var(--red);}
+.barrow .n{width:34px;text-align:right;font-size:12px;color:var(--text-dim);}
+
+/* ---------- chart screen ---------- */
+.chart-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+.chart-table th,.chart-table td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:center;}
+.chart-table th{color:var(--text-dim);font-weight:600;font-size:12px;}
+.chart-table td.bn{font-family:'Tiro Bangla',serif;font-size:17px;color:var(--gold);}
+.chart-table td.k{font-weight:800;}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;padding:4px 14px;background:var(--bg2);margin-bottom:20px;}
+
+footer.pagefoot{text-align:center;color:var(--text-dim);font-size:12.5px;padding:40px 0 10px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* =========================================================================
+   ১) বিজয় ৫২ কী-ম্যাপ ইঞ্জিন (verified against official Bijoy 52 layout)
+   ========================================================================= */
+const KEYMAP = {
+  '`':{base:'',shift:'',altgr:''},
+  '1':{base:'১',shift:'!',altgr:'৴'}, '2':{base:'২',shift:'@',altgr:'৵'},
+  '3':{base:'৩',shift:'#',altgr:'৶'}, '4':{base:'৪',shift:'৳',altgr:'৷'},
+  '5':{base:'৫',shift:'%',altgr:'৲'}, '6':{base:'৬',shift:'÷',altgr:''},
+  '7':{base:'৭',shift:'ঁ',altgr:'৺'}, '8':{base:'৮',shift:'×',altgr:''},
+  '9':{base:'৯',shift:'(',altgr:''},  '0':{base:'০',shift:')',altgr:'৸'},
+  '-':{base:'-',shift:'_',altgr:'৹'}, '=':{base:'=',shift:'+',altgr:'≠'},
+  'q':{base:'ঙ',shift:'ং',altgr:''}, 'w':{base:'য',shift:'য়',altgr:''},
+  'e':{base:'ড',shift:'ঢ',altgr:'ঈ'}, 'r':{base:'প',shift:'ফ',altgr:''},
+  't':{base:'ট',shift:'ঠ',altgr:''}, 'y':{base:'চ',shift:'ছ',altgr:''},
+  'u':{base:'জ',shift:'ঝ',altgr:'ঊ'}, 'i':{base:'হ',shift:'ঞ',altgr:'ঐ'},
+  'o':{base:'গ',shift:'ঘ',altgr:'ঔ'}, 'p':{base:'ড়',shift:'ঢ়',altgr:''},
+  '[':{base:'[',shift:'{',altgr:''}, ']':{base:']',shift:'}',altgr:''},
+  '\\':{base:'ঃ',shift:'ৎ',altgr:''},
+  'a':{base:'ৃ',shift:'র্',altgr:'ঋ'}, 's':{base:'ু',shift:'ূ',altgr:'উ'},
+  'd':{base:'ি',shift:'ী',altgr:'ই'}, 'f':{base:'া',shift:'অ',altgr:'আ'},
+  'g':{base:'্',shift:'।',altgr:'্'}, 'h':{base:'ব',shift:'ভ',altgr:'ৰ'},
+  'j':{base:'ক',shift:'খ',altgr:''}, 'k':{base:'ত',shift:'থ',altgr:''},
+  'l':{base:'দ',shift:'ধ',altgr:''}, ';':{base:';',shift:':',altgr:''},
+  "'":{base:"'",shift:'"',altgr:''},
+  'z':{base:'্র',shift:'্য',altgr:''}, 'x':{base:'ো',shift:'ৌ',altgr:'ও'},
+  'c':{base:'ে',shift:'ৈ',altgr:'এ'}, 'v':{base:'র',shift:'ল',altgr:'ৱ'},
+  'b':{base:'ন',shift:'ণ',altgr:''}, 'n':{base:'স',shift:'ষ',altgr:''},
+  'm':{base:'ম',shift:'শ',altgr:''}, ',':{base:',',shift:'<',altgr:''},
+  '.':{base:'.',shift:'>',altgr:'়'}, '/':{base:'/',shift:'?',altgr:''},
+};
+const CODE_TO_KEY = {
+  Backquote:'`',Digit1:'1',Digit2:'2',Digit3:'3',Digit4:'4',Digit5:'5',Digit6:'6',Digit7:'7',Digit8:'8',Digit9:'9',Digit0:'0',
+  Minus:'-',Equal:'=',KeyQ:'q',KeyW:'w',KeyE:'e',KeyR:'r',KeyT:'t',KeyY:'y',KeyU:'u',KeyI:'i',KeyO:'o',KeyP:'p',
+  BracketLeft:'[',BracketRight:']',Backslash:'\\',KeyA:'a',KeyS:'s',KeyD:'d',KeyF:'f',KeyG:'g',KeyH:'h',KeyJ:'j',
+  KeyK:'k',KeyL:'l',Semicolon:';',Quote:"'",KeyZ:'z',KeyX:'x',KeyC:'c',KeyV:'v',KeyB:'b',KeyN:'n',KeyM:'m',
+  Comma:',',Period:'.',Slash:'/',Space:' '
+};
+const FINGER = {
+  '`':0,'1':0,'q':0,'a':0,'z':0,
+  '2':1,'w':1,'s':1,'x':1,
+  '3':2,'e':2,'d':2,'c':2,
+  '4':3,'5':3,'r':3,'f':3,'v':3,'t':3,'g':3,'b':3,
+  '6':4,'7':4,'y':4,'h':4,'u':4,'n':4,'j':4,'m':4,
+  '8':5,'i':5,'k':5,',':5,
+  '9':6,'o':6,'l':6,'.':6,
+  '0':7,'-':7,'=':7,'p':7,'[':7,']':7,'\\':7,';':7,"'":7,'/':7,
+  ' ':8
+};
+const FINGER_COLOR = ['var(--f0)','var(--f1)','var(--f2)','var(--f3)','var(--f4)','var(--f5)','var(--f6)','var(--f7)','var(--f8)'];
+const FINGER_NAME = ['বাম কনিষ্ঠা','বাম অনামিকা','বাম মধ্যমা','বাম তর্জনী','ডান তর্জনী','ডান মধ্যমা','ডান অনামিকা','ডান কনিষ্ঠা','বৃদ্ধাঙ্গুলি'];
+
+const KEY_ROWS = [
+  [['`',1],['1',1],['2',1],['3',1],['4',1],['5',1],['6',1],['7',1],['8',1],['9',1],['0',1],['-',1],['=',1],['Backspace',1.7]],
+  [['Tab',1.5],['q',1],['w',1],['e',1],['r',1],['t',1],['y',1],['u',1],['i',1],['o',1],['p',1],['[',1],[']',1],['\\',1.5]],
+  [['CapsLock',1.8],['a',1],['s',1],['d',1],['f',1],['g',1],['h',1],['j',1],['k',1],['l',1],[';',1],["'",1],['Enter',2]],
+  [['Shift',2.3],['z',1],['x',1],['c',1],['v',1],['b',1],['n',1],['m',1],[',',1],['.',1],['/',1],['Shift',2.3]],
+  [['Ctrl',1.3],['Win',1.1],['Alt',1.1],[' ',6],['AltGr',1.1],['Win',1.1],['Menu',1.1],['Ctrl',1.3]]
+];
+const CTRL_LABEL = {Backspace:'⌫ Bksp',Tab:'Tab ⇥',CapsLock:'Caps Lock',Enter:'⏎ Enter',Shift:'⇧ Shift',Ctrl:'Ctrl',Win:'⊞',Alt:'Alt',AltGr:'AltGr',Menu:'☰'};
+
+function parseCode(code){
+  // lowercase = base key, UPPERCASE = shift, '@'+lower = altgr, ' ' = literal space
+  const tokens=[]; let i=0;
+  while(i<code.length){
+    const ch=code[i];
+    if(ch==='@'){ tokens.push({key:code[i+1].toLowerCase(),layer:'altgr'}); i+=2; continue; }
+    if(ch===' '){ tokens.push({key:' ',layer:'space'}); i++; continue; }
+    if(ch>='A'&&ch<='Z'){ tokens.push({key:ch.toLowerCase(),layer:'shift'}); i++; continue; }
+    tokens.push({key:ch,layer:'base'}); i++;
+  }
+  return tokens;
+}
+function tokenChar(t){ return t.layer==='space' ? ' ' : (KEYMAP[t.key] ? KEYMAP[t.key][t.layer] : ''); }
+function buildChars(tokens){ return tokens.map(t=>({key:t.key,layer:t.layer,char:tokenChar(t),state:'pending'})); }
+
+/* =========================================================================
+   ২) শব্দভাণ্ডার ও পাঠ (lessons) — প্রতিটি শব্দ hand-verified বিজয় কী-সিকোয়েন্স থেকে
+   ========================================================================= */
+const LESSONS = [
+  { id:1, title:'হোম রো — প্রথম পরিচয়', keys:['a','s','d','f','g','h','j','k','l'],
+    desc:'আঙুল রাখুন F এবং J কী-তে (এতে ছোট্ট একটা খাঁজ অনুভব করবেন)। এই সারিই আপনার “ঘর” — প্রতিটি টাইপের পর আঙুল এখানেই ফিরে আসবে।',
+    words:[['jd','কি — প্রশ্নবাচক শব্দ'],['jfj','কাক — একটি পাখি'],['kfj','তাক — শেলফ'],
+           ['jflf','কাদা — নরম মাটি'],['lfls','দাদু — ঠাকুরদা'],['lflf','দাদা — বড় ভাই']] },
+  { id:2, title:'নিচের সারি', keys:['v','b','n','m'],
+    desc:'এবার হাত নামিয়ে আনুন সবচেয়ে নিচের সারিতে। V, B বাম হাতের তর্জনী দিয়ে; N, M ডান হাতের তর্জনী দিয়ে চাপুন।',
+    words:[['hb','বন — জঙ্গল'],['mb','মন — হৃদয়'],['bfm','নাম — পরিচয়'],['nh','সব — সকল'],
+           ['vfk','রাত — রাত্রি'],['hfv','বার — সময়'],['nflf','সাদা — একটি রং'],['hfnf','বাসা — ঘর'],
+           ['mfn','মাস — ৩০ দিন'],['lfb','দান — দেওয়া'],['jfb','কান — শোনার অঙ্গ']] },
+  { id:3, title:'ওপরের সারি (ডান দিক)', keys:['u','i','o','y','t','r','e'],
+    desc:'হাত এবার ওপরের সারিতে উঠবে। প্রতিটি কী চাপার পর আঙুল আবার হোম রো-তে ফিরিয়ে আনুন — এটাই আসল টাচ-টাইপিং।',
+    words:[['ofb','গান — সংগীত'],['ufof','জাগা — ঘুম ভাঙা'],['tfjf','টাকা — মুদ্রা'],['ifnd','হাসি — আনন্দ'],
+           ['yfjf','চাকা — গাড়ির অংশ'],['ufmf','জামা — পোশাক'],['rfkf','পাতা — গাছের অংশ'],
+           ['mftd','মাটি — মৃত্তিকা'],['ovs','গরু — একটি প্রাণী'],['ifk','হাত — শরীরের অঙ্গ'],['efj','ডাক — চিঠি']] },
+  { id:4, title:'ওপরের সারি (বাকি অংশ)', keys:['q','w','p'],
+    desc:'Q, W, P — এই তিনটি কী দিয়ে সারি সম্পূর্ণ হলো। P কী থেকে আসে ড়, যা বাংলায় খুব দরকারি।',
+    words:[['wfh','যাব — যাওয়া (ভবিষ্যৎ)'],['hfpd','বাড়ি — ঘর'],['jfpf','কড়া — কঠোর'],['ufls','জাদু — ম্যাজিক']] },
+  { id:5, title:'শিফট কী — জোড়া অক্ষর', keys:['H','J','K','L','F'],
+    desc:'প্রতিটি কী আসলে দুটি অক্ষর ধারণ করে। Shift চেপে ধরে কী চাপলে দ্বিতীয় (মহাপ্রাণ) অক্ষরটি আসে — যেমন h→ব কিন্তু Shift+h→ভ।',
+    words:[['Hfk','ভাত — প্রধান খাবার'],['Jfkf','খাতা — নোটবুক'],['Lb','ধন — সম্পদ'],
+           ['jfKf','কথা — বাক্য'],['mfKf','মাথা — শরীরের অঙ্গ']] },
+  { id:6, title:'কার-চিহ্ন ও আরও শিফট', keys:['c','x','V','R','M'],
+    desc:'C ও X থেকে আসে ে ও ো কার-চিহ্ন। আর Shift+v থেকে আসে ল — বাংলার অন্যতম ব্যবহৃত অক্ষর।',
+    words:[['jcb','কেন — প্রশ্নবাচক'],['lcM','দেশ — রাষ্ট্র'],['nxbf','সোনা — মূল্যবান ধাতু'],
+           ['jxb','কোন — প্রশ্নবাচক'],['jVf','কলা — একটি ফল'],['uV','জল — পানি'],['RsV','ফুল — পুষ্প']] },
+  { id:7, title:'অল্টগ্র — স্বাধীন স্বরবর্ণ', keys:['@f','@d','@s','@a','@e','@u','@i','@o','@x','@c'], altgrLesson:true,
+    desc:'ডান পাশের Alt (AltGr) কী চেপে ধরে টাইপ করুন — এভাবেই শব্দের শুরুতে বসা "স্বাধীন" স্বরবর্ণ (আ, ই, এ...) লেখা হয়। ল্যাপটপে Ctrl+Alt চেপেও চেষ্টা করতে পারেন।',
+    words:[['@fm','আম — একটি ফল'],['@dt','ইট — নির্মাণ সামগ্রী'],['@sbd','উনি — সম্মানসূচক সর্বনাম'],
+           ['@cj','এক — সংখ্যা ১'],['@xub','ওজন — ভার']],
+    bonus:['@fmd HfVx @fYdG','আমি ভালো আছি। — সম্পূর্ণ বাক্য অনুশীলন'] },
+  { id:8, title:'সংখ্যা ও যতিচিহ্ন', keys:['1','2','3','4','5','6','7','8','9','0','G'],
+    desc:'সংখ্যার সারিতে শিফট ছাড়া সরাসরি বাংলা সংখ্যা আসে (১, ২, ৩...)। আর Shift+G দেয় দাঁড়ি (।) — বাংলা বাক্যের দাঁড়ি, ইংরেজি ফুলস্টপের বদলে এটাই ব্যবহার হয়।',
+    words:[['2026','সাল — বছরের সংখ্যা'],['1971','সাল — একটি ঐতিহাসিক বছর'],['jfjG','কাক। — বাক্যের শেষে দাঁড়ি'],
+           ['mfKfG','মাথা। — বাক্যের শেষে দাঁড়ি']] },
+];
+function lessonWordTokens(pair){ return {tokens:parseCode(pair[0]), gloss:pair[1]}; }
+
+/* =========================================================================
+   ৩) TypingSession — মূল টাইপিং ইঞ্জিন
+   ========================================================================= */
+class TypingSession{
+  constructor(items, opts){
+    // items: array of {tokens, gloss}
+    this.items = items;
+    this.chars = []; this.itemBounds = [];
+    items.forEach((it,idx)=>{
+      if(idx>0){ this.chars.push({key:' ',layer:'space',char:' ',state:'pending', wordBreak:true}); }
+      const start=this.chars.length;
+      buildChars(it.tokens).forEach(c=>this.chars.push(c));
+      this.itemBounds.push([start,this.chars.length]);
+    });
+    this.pos=0; this.startTime=null; this.endTime=null;
+    this.correct=0; this.wrong=0; this.combo=0; this.maxCombo=0;
+    this.mistakes={}; // key -> count
+    this.mistakeDetail={}; // key -> {expectedLayer,typed}
+    this.onUpdate = opts.onUpdate || function(){};
+    this.onComplete = opts.onComplete || function(){};
+    this.onMistake = opts.onMistake || function(){};
+  }
+  currentToken(){ return this.pos < this.chars.length ? this.chars[this.pos] : null; }
+  progress(){ return this.chars.length ? this.pos/this.chars.length : 0; }
+  elapsedMin(){ if(!this.startTime) return 0; const end=this.endTime||Date.now(); return (end-this.startTime)/60000; }
+  wpm(){ const m=this.elapsedMin(); if(!m) return 0; return Math.round((this.correct/5)/m) || 0; }
+  accuracy(){ const t=this.correct+this.wrong; return t? Math.round(this.correct/t*100):100; }
+  backspace(){
+    if(this.pos<=0) return;
+    this.pos--;
+    const c=this.chars[this.pos];
+    if(c.state==='correct') this.correct--; else if(c.state==='wrong') this.wrong--;
+    c.state='pending';
+    this.onUpdate();
+  }
+  input(keyId, layerWanted){
+    if(!this.startTime) this.startTime=Date.now();
+    const cur=this.currentToken();
+    if(!cur) return;
+    let typedChar;
+    if(keyId===' '){ typedChar=' '; }
+    else{ const km=KEYMAP[keyId]; typedChar = km ? km[layerWanted] : undefined; }
+    if(typedChar===undefined) return;
+    const expected=cur.char;
+    if(typedChar===expected){
+      cur.state='correct'; this.correct++; this.combo++; this.maxCombo=Math.max(this.maxCombo,this.combo);
+    }else{
+      cur.state='wrong'; this.wrong++; this.combo=0;
+      const mk=cur.key==='  '?'?':cur.key;
+      this.mistakes[cur.key]=(this.mistakes[cur.key]||0)+1;
+      this.mistakeDetail[cur.key]={expectedLayer:cur.layer,typedKey:keyId,typedLayer:layerWanted};
+      this.onMistake(cur,keyId,layerWanted);
+    }
+    this.pos++;
+    if(this.pos>=this.chars.length){ this.endTime=Date.now(); this.onUpdate(); this.onComplete(this.summary()); return; }
+    this.onUpdate();
+  }
+  summary(){
+    return { wpm:this.wpm(), accuracy:this.accuracy(), correct:this.correct, wrong:this.wrong,
+      maxCombo:this.maxCombo, timeSec:Math.round((this.endTime-this.startTime)/1000)||0, mistakes:this.mistakes };
+  }
+}
+
+/* =========================================================================
+   ৪) localStorage helpers
+   ========================================================================= */
+const LS_KEY='bijoy_shikhi_v1';
+function loadDB(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {progress:{}, history:[], mistakes:{}, sound:true}; }
+  catch(e){ return {progress:{}, history:[], mistakes:{}, sound:true}; }
+}
+function saveDB(db){ try{ localStorage.setItem(LS_KEY, JSON.stringify(db)); }catch(e){} }
+let DB = loadDB();
+function recordSession(kind, label, summary){
+  DB.history.unshift({ kind, label, wpm:summary.wpm, accuracy:summary.accuracy, time:summary.timeSec, date:Date.now() });
+  DB.history = DB.history.slice(0,60);
+  Object.keys(summary.mistakes).forEach(k=>{ DB.mistakes[k]=(DB.mistakes[k]||0)+summary.mistakes[k]; });
+  saveDB(DB);
+}
+function markLessonDone(id, wpm){
+  const p = DB.progress[id] || {done:false,bestWpm:0};
+  p.done = true; p.bestWpm = Math.max(p.bestWpm, wpm);
+  DB.progress[id]=p; saveDB(DB);
+}
+function isUnlocked(lessonIdx){ if(lessonIdx===0) return true; return !!(DB.progress[LESSONS[lessonIdx-1].id]||{}).done; }
+
+/* =========================================================================
+   ৫) সাউন্ড (ওয়েব অডিও — কোনো ফাইল লাগে না)
+   ========================================================================= */
+let actx=null;
+function beep(freq,dur,type){
+  if(!DB.sound) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type||'sine'; o.frequency.value=freq;
+    g.gain.value=0.05; o.connect(g); g.connect(actx.destination);
+    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+dur);
+    o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+function sndCorrect(){ beep(720,0.07,'sine'); }
+function sndWrong(){ beep(160,0.14,'sawtooth'); }
+function sndDone(){ beep(500,0.1,'sine'); setTimeout(()=>beep(700,0.16,'sine'),90); }
+
+/* =========================================================================
+   ৬) STATE + ROUTER
+   ========================================================================= */
+const state = { screen:'home', lessonIdx:0, session:null, roundKind:null, roundLabel:'', vShift:false, vAltgr:false, showAltgr:false };
+function go(screen, extra){ state.screen=screen; Object.assign(state, extra||{}); render(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+/* =========================================================================
+   ৭) KEYBOARD RENDER
+   ========================================================================= */
+function renderKeyboard(expected, opts){
+  opts=opts||{};
+  const showAltgr = opts.showAltgr;
+  let html = '<div class="kb" id="virtualKb">';
+  KEY_ROWS.forEach(row=>{
+    html += '<div class="kbrow">';
+    row.forEach(([id,w])=>{
+      const isTyping = KEYMAP[id]!==undefined || id===' ';
+      let cls='key';
+      if(!isTyping){
+        cls+=' ctrl';
+        if(id==='Backspace') cls+=' w-bksp';
+        else if(id==='Tab'||id==='CapsLock'||id==='\\') cls+=' w-tab';
+        else if(id==='Enter') cls+=' w-enter';
+        else if(id==='Shift') cls+=' w-shift';
+        else cls+=' w-sm';
+        let active = false;
+        if(expected){
+          if(id==='Shift' && expected.layer==='shift') active=true;
+          if(id==='AltGr' && expected.layer==='altgr') active=true;
+        }
+        if(active) cls+=' mod-active';
+        html += `<div class="${cls}" style="flex:${w}"><button data-ctrl="${id}">${CTRL_LABEL[id]||id}</button></div>`;
+        return;
+      }
+      if(id===' '){
+        cls+=' w-space';
+        let active = expected && expected.key===' ';
+        if(active) cls+=' active';
+        html += `<div class="${cls}" style="flex:${w}"><button data-key=" " style="width:100%;height:100%;">স্পেস</button></div>`;
+        return;
+      }
+      const km = KEYMAP[id];
+      const fi = FINGER[id];
+      let active = expected && expected.key===id;
+      if(active) cls+=' active';
+      const bn = km.base || '';
+      const sh = km.shift || '';
+      const ag = km.altgr || '';
+      html += `<div class="${cls}" style="flex:${w}">
+        <div class="fingertip" style="background:${FINGER_COLOR[fi]}"></div>
+        ${sh?`<div class="shift">${sh}</div>`:''}
+        ${(showAltgr && ag)?`<div class="altgr">${ag}</div>`:''}
+        <button data-key="${id}">
+          <span class="base">${bn||id.toUpperCase()}</span>
+        </button>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+function bindKeyboardClicks(container, onVirtualKey){
+  container.querySelectorAll('#virtualKb [data-key]').forEach(btn=>{
+    btn.addEventListener('click',()=>onVirtualKey(btn.getAttribute('data-key')));
+  });
+  container.querySelectorAll('#virtualKb [data-ctrl]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const c=btn.getAttribute('data-ctrl');
+      if(c==='Shift'){ state.vShift=!state.vShift; state.vAltgr=false; refreshTypingUI(); }
+      if(c==='AltGr'){ state.vAltgr=!state.vAltgr; state.vShift=false; refreshTypingUI(); }
+      if(c==='Backspace' && state.session){ state.session.backspace(); refreshTypingUI(); }
+    });
+  });
+}
+
+/* =========================================================================
+   ৮) TYPING SCREEN (shared by lessons + game) rendering pieces
+   ========================================================================= */
+function renderTypebox(session){
+  let html='';
+  session.chars.forEach((c,i)=>{
+    let cls='tk '+c.state;
+    if(c.key===' ') cls+=' space';
+    if(i===session.pos) cls+=' current';
+    const shown = c.char===' ' ? '\u00A0\u00A0' : (c.char||'\u00A0');
+    html += `<span class="${cls}">${shown}</span>`;
+  });
+  return html;
+}
+function nextKeyHint(session){
+  const cur = session.currentToken();
+  if(!cur) return '';
+  if(cur.key===' '){
+    return `<div class="nextkey-hint"><div class="badge" style="background:${FINGER_COLOR[8]}">␣</div>
+      <span>স্পেসবার চাপুন</span><span class="arrow">→</span><span class="bnchar">শব্দের মাঝে ফাঁকা</span></div>`;
+  }
+  const fi = FINGER[cur.key];
+  const modifier = cur.layer==='shift' ? 'Shift + ' : (cur.layer==='altgr' ? 'AltGr + ' : '');
+  return `<div class="nextkey-hint">
+    <div class="badge" style="background:${FINGER_COLOR[fi]}">${cur.key.toUpperCase()}</div>
+    <span>${modifier}<b>${cur.key.toUpperCase()}</b> চাপুন</span>
+    <span class="arrow">→</span>
+    <span class="bnchar">${cur.char}</span>
+    <span class="muted" style="margin-left:auto;font-size:12px;">${FINGER_NAME[fi]}</span>
+  </div>`;
+}
+function statBarHTML(session){
+  return `<div class="statbar">
+    <div class="statchip"><b>${session.wpm()}</b><span>WPM</span></div>
+    <div class="statchip"><b>${session.accuracy()}%</b><span>নির্ভুলতা</span></div>
+    <div class="statchip"><b>${session.combo}</b><span>কম্বো</span></div>
+    <div class="statchip"><b>${session.wrong}</b><span>ভুল</span></div>
+  </div>`;
+}
+
+let activeKeyHandler = null;
+function attachPhysicalKeyboard(session, onAny){
+  if(activeKeyHandler) document.removeEventListener('keydown', activeKeyHandler);
+  activeKeyHandler = function(e){
+    if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    const isAltGr = (e.getModifierState && e.getModifierState('AltGraph')) || (e.ctrlKey && e.altKey);
+    if((e.ctrlKey||e.metaKey) && !isAltGr) return; // let real browser shortcuts through
+    if(e.key==='Backspace'){ e.preventDefault(); session.backspace(); onAny(); return; }
+    if(e.code==='Tab' || e.code==='Escape') return;
+    const keyId = CODE_TO_KEY[e.code];
+    if(keyId===undefined) return;
+    e.preventDefault();
+    let layer='base';
+    if(keyId===' ') layer='space';
+    else if(isAltGr) layer='altgr';
+    else if(e.shiftKey) layer='shift';
+    const before = session.pos;
+    session.input(keyId, layer);
+    if(session.pos>before){
+      const st = session.chars[before].state;
+      if(st==='correct') sndCorrect(); else sndWrong();
+    }
+    onAny();
+  };
+  document.addEventListener('keydown', activeKeyHandler);
+}
+function detachPhysicalKeyboard(){ if(activeKeyHandler){ document.removeEventListener('keydown', activeKeyHandler); activeKeyHandler=null; } }
+function handleVirtualKey(keyId){
+  const session = state.session; if(!session) return;
+  let layer = state.vAltgr ? 'altgr' : (state.vShift ? 'shift' : 'base');
+  if(keyId===' ') layer='space';
+  const before=session.pos;
+  session.input(keyId, layer);
+  state.vShift=false; state.vAltgr=false;
+  if(session.pos>before){ const st=session.chars[before].state; if(st==='correct') sndCorrect(); else sndWrong(); }
+  refreshTypingUI();
+}
+
+function showMistakeToast(msg){
+  const t=document.getElementById('toast'); if(!t) return;
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(showMistakeToast._t);
+  showMistakeToast._t = setTimeout(()=>t.classList.remove('show'), 1600);
+}
+function mistakeMsg(cur, typedKey, typedLayer){
+  const wantMod = cur.layer==='shift'?'Shift+':(cur.layer==='altgr'?'AltGr+':'');
+  return `ভুল হলো — দরকার ছিল ${wantMod}${cur.key.toUpperCase()} (${cur.char})`;
+}
+
+function refreshTypingUI(){
+  const session = state.session; if(!session) return;
+  const sb=document.getElementById('statbarWrap'); if(sb) sb.innerHTML = statBarHTML(session);
+  const tb=document.getElementById('typebox'); if(tb) tb.innerHTML = renderTypebox(session);
+  const nk=document.getElementById('nextHint'); if(nk) nk.innerHTML = nextKeyHint(session);
+  const pf=document.getElementById('progFill'); if(pf) pf.style.width = Math.round(session.progress()*100)+'%';
+  const ef=document.getElementById('energyFill'); if(ef) ef.style.width = Math.max(6,100-session.wrong*100/Math.max(6,session.correct+session.wrong))+'%';
+  const kbHolder=document.getElementById('kbHolder');
+  if(kbHolder){
+    kbHolder.innerHTML = renderKeyboard(session.currentToken(), {showAltgr: state.showAltgr});
+    bindKeyboardClicks(kbHolder, handleVirtualKey);
+  }
+}
+
+/* =========================================================================
+   ৯) SCREENS
+   ========================================================================= */
+function screenHome(){
+  const totalLessons=LESSONS.length;
+  const done = LESSONS.filter(l=>(DB.progress[l.id]||{}).done).length;
+  const bestWpm = DB.history.reduce((m,h)=>Math.max(m,h.wpm||0),0);
+  return `
+  <section class="hero">
+    <div class="eyebrow">বিজয় ৫২ কীবোর্ড শেখার প্ল্যাটফর্ম by morjina</div>
+    <h1 class="display">আঙুলের ডগায় বাংলা — ধাপে ধাপে বিজয় লেআউট শিখুন, তারপর গতি বাড়ান।</h1>
+    <p>একদম মৌলিক ধাপ থেকে শুরু — কোন ইংরেজি কী চাপলে কোন বাংলা অক্ষর আসে, কোন আঙুল ব্যবহার করবেন, সব দেখানো হবে সরাসরি কীবোর্ডের ওপর। শেখার পর নিজেকে যাচাই করুন টাইপিং-ফাইট মোডে — গতি, নির্ভুলতা আর ভুল বিশ্লেষণসহ।</p>
+    <div class="ctas">
+      <button class="btn btn-primary" data-go="lessons">শেখা শুরু করি →</button>
+      <button class="btn btn-ghost" data-go="game">সরাসরি অনুশীলনে যাই</button>
+    </div>
+  </section>
+  <div class="stripbox">
+    <div class="stat"><b>${done}/${totalLessons}</b><span>পাঠ সম্পন্ন</span></div>
+    <div class="stat"><b>${bestWpm}</b><span>সর্বোচ্চ WPM</span></div>
+    <div class="stat"><b>${DB.history.length}</b><span>মোট অনুশীলন সেশন</span></div>
+    <div class="stat"><b>৪</b><span>কীবোর্ড লেয়ার কভার</span></div>
+  </div>
+  <div class="grid cols-3">
+    <div class="card feature"><span class="num">০১</span><h3>কী → অক্ষর, চোখের সামনে</h3><p>প্রতিটি ধাপে ভার্চুয়াল কীবোর্ডে ঠিক যে কী চাপতে হবে সেটা আলোকিত হয়ে থাকে, সাথে কোন আঙুল ব্যবহার করবেন তার রং-কোড।</p></div>
+    <div class="card feature"><span class="num">০২</span><h3>আসল শব্দ দিয়ে অনুশীলন</h3><p>শুধু এলোমেলো অক্ষর নয় — প্রতিটি পাঠে আছে প্রকৃত বাংলা শব্দ, যাতে হাতের সাথে সাথে মনও শিখে যায়।</p></div>
+    <div class="card feature"><span class="num">০৩</span><h3>গতি, ভুল ও সংশোধন</h3><p>প্র্যাকটিস মোডে প্রতিটি সেশনের WPM, নির্ভুলতা আর কোন কী-তে সবচেয়ে বেশি ভুল হচ্ছে তা ট্র্যাক হয়, সাথে সংশোধনের পরামর্শ।</p></div>
+  </div>
+  <section style="margin-top:34px;">
+    <h2 class="section-title">কীভাবে কাজ করে</h2>
+    <p class="section-sub">চারটি ধাপে পুরো বিজয় লেআউট রপ্ত করবেন।</p>
+    <div class="grid cols-2">
+      <div class="card"><b style="color:var(--gold)">ধাপ ১ · শিখুন</b><p class="muted" style="margin-top:8px;">হোম রো থেকে শুরু করে ধীরে ধীরে পুরো কীবোর্ড — প্রতিটি নতুন কী এক এক করে পরিচয় করানো হয়।</p></div>
+      <div class="card"><b style="color:var(--gold)">ধাপ ২ · অনুশীলন করুন</b><p class="muted" style="margin-top:8px;">প্রতিটি পাঠে বাস্তব বাংলা শব্দ টাইপ করুন, ভুল হলে সাথে সাথে বোঝানো হয় কী চাপা উচিত ছিল।</p></div>
+      <div class="card"><b style="color:var(--gold)">ধাপ ৩ · গতি যাচাই করুন</b><p class="muted" style="margin-top:8px;">টাইপিং-ফাইট মোডে সময়ের বিপরীতে টাইপ করুন — কম্বো, স্কোর আর এনার্জি বার সহ।</p></div>
+      <div class="card"><b style="color:var(--gold)">ধাপ ৪ · অগ্রগতি দেখুন</b><p class="muted" style="margin-top:8px;">পরিসংখ্যান পাতায় দেখুন সময়ের সাথে আপনার গতি কতটা বেড়েছে, আর কোন কী-গুলো আরও অনুশীলন দরকার।</p></div>
+    </div>
+  </section>`;
+}
+
+function screenLessons(){
+  let rows='';
+  LESSONS.forEach((l,idx)=>{
+    const unlocked = isUnlocked(idx);
+    const prog = DB.progress[l.id]||{};
+    const keychips = l.keys.map(k=>`<span class="keychip">${k.replace('@','AltGr+').toUpperCase()}</span>`).join('');
+    rows += `<div class="lesson-row ${unlocked?'':'locked'} ${prog.done?'done':''}" ${unlocked?`data-lesson="${idx}"`:''}>
+      <div class="lesson-num">${prog.done?'✓':idx+1}</div>
+      <div class="lesson-body">
+        <h3>${l.title}</h3>
+        <p>${unlocked? (l.words.length+' শব্দ অনুশীলন') : 'আগের পাঠ শেষ করলে খুলবে'}</p>
+        <div class="lesson-keys">${keychips}</div>
+      </div>
+      <div class="lesson-wpm">${prog.done?`<b>${prog.bestWpm}</b>সেরা WPM`:''}</div>
+    </div>`;
+  });
+  return `
+    <h2 class="section-title">শেখার পাঠ</h2>
+    <p class="section-sub">একটার পর একটা ধাপ। প্রতিটি পাঠ শেষ করলেই পরেরটা খুলে যাবে — কোনো তাড়া নেই।</p>
+    ${rows}`;
+}
+
+function screenLessonIntro(idx){
+  const l = LESSONS[idx];
+  const nkHtml = l.keys.map(k=>{
+    const altgr = k.startsWith('@');
+    const rawKey = altgr? k.slice(1): k.toLowerCase();
+    const isShift = !altgr && k===k.toUpperCase() && k.match(/[A-Z]/);
+    const km = KEYMAP[rawKey];
+    let bn='', label=rawKey.toUpperCase();
+    if(altgr){ bn=km.altgr; label='AltGr+'+rawKey.toUpperCase(); }
+    else if(isShift){ bn=km.shift; label='Shift+'+rawKey.toUpperCase(); }
+    else { bn=km.base; label=rawKey.toUpperCase(); }
+    const fi = FINGER[rawKey];
+    return `<div class="nk-card"><div class="en">${label}</div><div class="arrowbn">${bn}</div><div class="fname" style="color:${FINGER_COLOR[fi]}">${FINGER_NAME[fi]}</div></div>`;
+  }).join('');
+  const wl = l.words.map(([code,gloss])=>{
+    const toks=parseCode(code); const bn=toks.map(tokenChar).join('');
+    return `<div class="wl-chip">${bn}<small>${gloss.split('—')[1]||''}</small></div>`;
+  }).join('');
+  return `
+  <button class="btn btn-ghost" data-go="lessons" style="margin-bottom:18px;">← সব পাঠ</button>
+  <div class="pill">পাঠ ${idx+1} / ${LESSONS.length}</div>
+  <h2 class="section-title">${l.title}</h2>
+  <p class="section-sub">${l.desc}</p>
+  <div class="newkeys-strip">${nkHtml}</div>
+  <h3 style="margin:26px 0 4px;font-size:16px;color:var(--text-dim);">এই পাঠে যেসব শব্দ অনুশীলন করবেন</h3>
+  <div class="wordlist-preview">${wl}</div>
+  <button class="btn btn-primary" style="margin-top:22px;" data-start-lesson="${idx}">অনুশীলন শুরু করি →</button>
+  `;
+}
+
+function buildLessonItems(l){
+  const items = l.words.map(([code,gloss])=>({tokens:parseCode(code), gloss}));
+  if(l.bonus){ items.push({tokens:parseCode(l.bonus[0]), gloss:l.bonus[1]}); }
+  return items;
+}
+
+function screenTypingShell(title, subtitle, backAction){
+  return `
+  <button class="btn btn-ghost" data-go="${backAction}" style="margin-bottom:14px;">← পেছনে</button>
+  <div class="practice-head">
+    <div><h2 class="section-title" style="margin-bottom:2px;">${title}</h2><p class="muted" style="margin:0;">${subtitle}</p></div>
+    <div id="statbarWrap"></div>
+  </div>
+  <div class="energywrap">
+    <div class="energybar"><div class="progressfill" id="progFill" style="width:0%"></div></div>
+    <div class="energylabels"><span>অগ্রগতি</span><span id="progLabel"></span></div>
+  </div>
+  <div id="nextHint"></div>
+  <div class="typebox" id="typebox"></div>
+  <div class="kbwrap">
+    <div class="kbtoolbar">
+      <div class="legend">
+        <span><span class="dot" style="background:var(--gold)"></span>বর্তমান কী</span>
+        <span><span class="dot" style="background:var(--green)"></span>সঠিক</span>
+        <span><span class="dot" style="background:var(--red)"></span>ভুল</span>
+      </div>
+      <button class="togglebtn" id="altgrToggle">AltGr চার্ট ${state.showAltgr?'লুকান':'দেখান'}</button>
+    </div>
+    <div id="kbHolder"></div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <p class="muted" style="margin-top:16px;font-size:13px;">ডেস্কটপ কীবোর্ডে টাইপ করুন, অথবা ওপরের ভার্চুয়াল কীবোর্ডে ট্যাপ করুন। ভুল হলে Backspace চেপে ঠিক করে নিতে পারবেন।</p>
+  `;
+}
+
+function screenResults(kind, summary, label, onNext){
+  const mistakeEntries = Object.entries(summary.mistakes).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const mHtml = mistakeEntries.length ? mistakeEntries.map(([k,c])=>{
+    const km=KEYMAP[k];
+    const tip = km ? `${k.toUpperCase()} কী চাপলে <b>${km.base}</b> আসে, Shift+${k.toUpperCase()} চাপলে <b>${km.shift}</b>` : '';
+    return `<div class="mistake-row"><div class="badge">${k.toUpperCase()}</div><div class="txt">${tip}</div><div class="cnt">${c} বার ভুল</div></div>`;
+  }).join('') : `<p class="muted">চমৎকার — কোনো ভুল হয়নি!</p>`;
+  return `
+  <div class="card resultcard">
+    <div class="muted">${label}</div>
+    <div class="big">${summary.wpm} <span style="font-size:22px;color:var(--text-dim);">WPM</span></div>
+    <div class="result-grid">
+      <div class="rc"><b>${summary.accuracy}%</b><span>নির্ভুলতা</span></div>
+      <div class="rc"><b>${summary.correct}</b><span>সঠিক কী-স্ট্রোক</span></div>
+      <div class="rc"><b>${summary.maxCombo}</b><span>সর্বোচ্চ কম্বো</span></div>
+      <div class="rc"><b>${summary.timeSec}s</b><span>সময়</span></div>
+    </div>
+    <h3 style="text-align:left;font-size:16px;margin:22px 0 10px;">ভুল বিশ্লেষণ ও সংশোধন</h3>
+    <div style="text-align:left;">${mHtml}</div>
+    <div style="margin-top:26px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-primary" id="resultNext">${onNext}</button>
+      <button class="btn btn-ghost" data-go="lessons">সব পাঠ দেখি</button>
+      <button class="btn btn-ghost" data-go="game">প্র্যাকটিস মোডে যাই</button>
+    </div>
+  </div>`;
+}
+
+function screenGameIntro(){
+  return `
+  <h2 class="section-title">অনুশীলন যুদ্ধ — টাইপিং ফাইট</h2>
+  <p class="section-sub">শেখা সব শব্দ থেকে র‍্যান্ডম ২০টি শব্দ নিয়ে একটি রাউন্ড শুরু হবে। যত দ্রুত ও নিভুর্লভাবে টাইপ করবেন, স্কোর ও কম্বো তত বাড়বে। ভুল হলে এনার্জি বার কমে যাবে — কিন্তু থেমে থাকবেন না, টাইপ চালিয়ে যান!</p>
+  <div class="grid cols-3" style="margin-bottom:26px;">
+    <div class="card feature"><span class="num">⚡</span><h3>কম্বো সিস্টেম</h3><p>টানা সঠিক টাইপ করলে কম্বো বাড়বে — একটা ভুলেই কম্বো রিসেট হয়ে যায়, ঠিক ফাইটিং গেমের মতো।</p></div>
+    <div class="card feature"><span class="num">🎯</span><h3>নির্ভুলতা ট্র্যাকিং</h3><p>প্রতিটি অক্ষর আলাদাভাবে ট্র্যাক হয় — শেষে জানতে পারবেন ঠিক কোন কী-তে সবচেয়ে বেশি ভুল হচ্ছে।</p></div>
+    <div class="card feature"><span class="num">📈</span><h3>ইতিহাস সংরক্ষণ</h3><p>প্রতিটি রাউন্ডের ফলাফল সংরক্ষিত থাকে পরিসংখ্যান পাতায়, যাতে অগ্রগতি বুঝতে পারেন।</p></div>
+  </div>
+  <button class="btn btn-primary" data-start-game="1">রাউন্ড শুরু করি →</button>
+  `;
+}
+
+function pickGameWords(n){
+  const all=[];
+  LESSONS.forEach(l=> l.words.forEach(w=>all.push(w)) );
+  const picked=[];
+  const pool=[...all];
+  for(let i=0;i<n && pool.length;i++){
+    const idx=Math.floor(Math.random()*pool.length);
+    picked.push(pool.splice(idx,1)[0]);
+  }
+  return picked.map(([code,gloss])=>({tokens:parseCode(code), gloss}));
+}
+
+function screenStats(){
+  const hist = DB.history.slice(0,15);
+  const histHtml = hist.length? hist.map(h=>{
+    const d=new Date(h.date);
+    return `<div class="histrow"><span>${h.label}</span><span class="l">${d.toLocaleDateString('bn-BD')}</span><span><b style="color:var(--gold)">${h.wpm}</b> WPM · ${h.accuracy}%</span></div>`;
+  }).join('') : `<p class="muted">এখনো কোনো সেশন সম্পন্ন হয়নি — শেখা বা অনুশীলন শুরু করুন।</p>`;
+
+  const mistakeArr = Object.entries(DB.mistakes).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxM = mistakeArr.length? mistakeArr[0][1] : 1;
+  const mistakeHtml = mistakeArr.length ? mistakeArr.map(([k,c])=>{
+    const km=KEYMAP[k];
+    return `<div class="barrow"><div class="lbl">${k.toUpperCase()} <span class="muted">(${km?km.base:''}/${km?km.shift:''})</span></div>
+      <div class="track"><div class="fill" style="width:${Math.round(c/maxM*100)}%"></div></div><div class="n">${c}</div></div>`;
+  }).join('') : `<p class="muted">এখনো কোনো ভুলের তথ্য নেই।</p>`;
+
+  const bestWpm = DB.history.reduce((m,h)=>Math.max(m,h.wpm||0),0);
+  const avgAcc = DB.history.length? Math.round(DB.history.reduce((s,h)=>s+h.accuracy,0)/DB.history.length):0;
+
+  return `
+  <h2 class="section-title">পরিসংখ্যান</h2>
+  <p class="section-sub">আপনার অগ্রগতি ও সবচেয়ে বেশি ভুল হওয়া কী-গুলোর তালিকা।</p>
+  <div class="grid cols-3" style="margin-bottom:28px;">
+    <div class="card"><b style="font-size:28px;color:var(--gold);font-family:'Tiro Bangla',serif;">${bestWpm}</b><div class="muted">সর্বোচ্চ WPM</div></div>
+    <div class="card"><b style="font-size:28px;color:var(--gold);font-family:'Tiro Bangla',serif;">${avgAcc}%</b><div class="muted">গড় নির্ভুলতা</div></div>
+    <div class="card"><b style="font-size:28px;color:var(--gold);font-family:'Tiro Bangla',serif;">${DB.history.length}</b><div class="muted">মোট সেশন</div></div>
+  </div>
+  <div class="grid cols-2">
+    <div class="card">
+      <h3 style="margin-top:0;font-size:16px;">সাম্প্রতিক সেশনসমূহ</h3>
+      ${histHtml}
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;font-size:16px;">সবচেয়ে বেশি ভুল হওয়া কী</h3>
+      ${mistakeHtml}
+      ${mistakeArr.length?`<p class="muted" style="font-size:12.5px;margin-top:14px;">টিপ: এই কী-গুলো ধীরে ধীরে, সচেতনভাবে কয়েকবার অনুশীলন করুন — গতি নয়, নির্ভুলতা আগে।</p>`:''}
+    </div>
+  </div>
+  `;
+}
+
+function screenChart(){
+  function row(label, keys){
+    return keys.map(k=>{
+      const km=KEYMAP[k];
+      return `<tr><td class="k">${k.toUpperCase()}</td><td class="bn">${km.base||'—'}</td><td class="bn">${km.shift||'—'}</td><td class="bn">${km.altgr||'—'}</td></tr>`;
+    }).join('');
+  }
+  return `
+  <h2 class="section-title">সম্পূর্ণ বিজয় ৫২ চার্ট</h2>
+  <p class="section-sub">রেফারেন্সের জন্য পুরো কী-ম্যাপ। Base = শিফট ছাড়া, Shift = শিফট চেপে, AltGr = ডান-Alt চেপে (স্বাধীন স্বরবর্ণ ও বিশেষ চিহ্নের জন্য)।</p>
+  <div class="tablewrap"><table class="chart-table">
+    <thead><tr><th>কী</th><th>Base</th><th>Shift</th><th>AltGr</th></tr></thead>
+    <tbody>
+      ${row('num',['1','2','3','4','5','6','7','8','9','0','-','='])}
+      ${row('top',['q','w','e','r','t','y','u','i','o','p','[',']','\\'])}
+      ${row('home',['a','s','d','f','g','h','j','k','l',';',"'"])}
+      ${row('bottom',['z','x','c','v','b','n','m',',','.','/'])}
+    </tbody>
+  </table></div>
+  <div class="kbwrap"><div id="kbHolderChart"></div></div>
+  `;
+}
+
+/* =========================================================================
+   ১০) MAIN RENDER
+   ========================================================================= */
+function navHTML(){
+  const tabs=[['home','হোম'],['lessons','শিখুন'],['game','অনুশীলন'],['stats','পরিসংখ্যান'],['chart','চার্ট']];
+  return tabs.map(([id,label])=>`<button class="${state.screen===id?'active':''}" data-go="${id}">${label}</button>`).join('');
+}
+function topbarHTML(){
+  return `
+  <div class="topbar">
+    <div class="brand" data-go="home"><div class="mark">বি</div><div class="name">বিজয় শিখি<small>BIJOY 52 TYPING</small></div></div>
+    <nav class="tabs">${navHTML()}</nav>
+    <div class="topbar-right">
+      <button class="iconbtn ${DB.sound?'on':''}" id="soundToggle" title="সাউন্ড">${DB.sound?'🔊':'🔇'}</button>
+    </div>
+  </div>`;
+}
+
+function render(){
+  detachPhysicalKeyboard();
+  let body='';
+  if(state.screen==='home') body=screenHome();
+  else if(state.screen==='lessons') body=screenLessons();
+  else if(state.screen==='lessonIntro') body=screenLessonIntro(state.lessonIdx);
+  else if(state.screen==='lessonPractice') body=screenTypingShell(LESSONS[state.lessonIdx].title, 'শব্দ অনুশীলন', 'lessonIntro');
+  else if(state.screen==='lessonResult') body=screenResults('lesson', state.lastSummary, LESSONS[state.lessonIdx].title, 'পরের পাঠে যাই →');
+  else if(state.screen==='game') body=screenGameIntro();
+  else if(state.screen==='gamePlay') body=screenTypingShell('টাইপিং ফাইট — রাউন্ড চলছে', '২০টি শব্দ, যত দ্রুত ও নিভুর্লভাবে সম্ভব', 'game');
+  else if(state.screen==='gameResult') body=screenResults('game', state.lastSummary, 'রাউন্ড ফলাফল', 'নতুন রাউন্ড →');
+  else if(state.screen==='stats') body=screenStats();
+  else if(state.screen==='chart') body=screenChart();
+
+  document.getElementById('app').innerHTML = topbarHTML() + `<div class="content">${body}</div>` +
+    `<footer class="pagefoot">বিজয় শিখি — মৌলিক থেকে দক্ষতা পর্যন্ত, ধাপে ধাপে বাংলা টাইপিং।</footer>`;
+
+  bindGlobalNav();
+
+  if(state.screen==='lessonIntro'){
+    document.querySelectorAll('[data-start-lesson]').forEach(b=>b.addEventListener('click', e=>{
+      startLessonPractice(parseInt(e.target.getAttribute('data-start-lesson')));
+    }));
+  }
+  if(state.screen==='game'){
+    document.querySelectorAll('[data-start-game]').forEach(b=>b.addEventListener('click', ()=> startGameRound() ));
+  }
+  if(state.screen==='lessonPractice' || state.screen==='gamePlay'){
+    setupTypingScreen();
+  }
+  if(state.screen==='lessonResult'){
+    document.getElementById('resultNext').addEventListener('click', ()=>{
+      const nextIdx = state.lessonIdx+1;
+      if(nextIdx < LESSONS.length) go('lessonIntro',{lessonIdx:nextIdx});
+      else go('lessons');
+    });
+  }
+  if(state.screen==='gameResult'){
+    document.getElementById('resultNext').addEventListener('click', ()=> startGameRound() );
+  }
+  if(state.screen==='chart'){
+    document.getElementById('kbHolderChart').innerHTML = renderKeyboard(null,{showAltgr:true});
+  }
+  if(state.screen==='lessons'){
+    document.querySelectorAll('[data-lesson]').forEach(row=>{
+      row.addEventListener('click', e=>{
+        const idx = parseInt(row.getAttribute('data-lesson'));
+        go('lessonIntro',{lessonIdx:idx});
+      });
+    });
+  }
+}
+function bindGlobalNav(){
+  document.querySelectorAll('[data-go]').forEach(el=>{
+    el.addEventListener('click', ()=> go(el.getAttribute('data-go')) );
+  });
+  const st=document.getElementById('soundToggle');
+  if(st) st.addEventListener('click', ()=>{ DB.sound=!DB.sound; saveDB(DB); render(); });
+}
+
+function startLessonPractice(idx){
+  const l = LESSONS[idx];
+  const items = buildLessonItems(l);
+  state.lessonIdx = idx;
+  state.session = new TypingSession(items, {
+    onUpdate: refreshTypingUI,
+    onMistake: (cur,k,layer)=> showMistakeToast(mistakeMsg(cur,k,layer)),
+    onComplete: (summary)=>{
+      sndDone();
+      markLessonDone(l.id, summary.wpm);
+      recordSession('lesson', l.title, summary);
+      state.lastSummary = summary;
+      setTimeout(()=> go('lessonResult'), 400);
+    }
+  });
+  go('lessonPractice');
+}
+function startGameRound(){
+  const items = pickGameWords(20);
+  state.session = new TypingSession(items, {
+    onUpdate: refreshTypingUI,
+    onMistake: (cur,k,layer)=> showMistakeToast(mistakeMsg(cur,k,layer)),
+    onComplete: (summary)=>{
+      sndDone();
+      recordSession('game', 'টাইপিং ফাইট রাউন্ড', summary);
+      state.lastSummary = summary;
+      setTimeout(()=> go('gameResult'), 400);
+    }
+  });
+  go('gamePlay');
+}
+function setupTypingScreen(){
+  const session = state.session;
+  refreshTypingUI();
+  attachPhysicalKeyboard(session, refreshTypingUI);
+  const at=document.getElementById('altgrToggle');
+  if(at) at.addEventListener('click', ()=>{ state.showAltgr=!state.showAltgr; refreshTypingUI(); at.textContent='AltGr চার্ট '+(state.showAltgr?'লুকান':'দেখান'); });
+}
+
+/* boot */
+render();
+</script>
+</body>
+</html>
