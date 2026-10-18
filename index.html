@@ -815,6 +815,7 @@ function screenHome(){
       <button class="btn btn-primary" data-go="lessons">${L('শেখা শুরু করি →','Start learning →')}</button>
       <button class="btn btn-ghost" data-go="test">${L('টাইপিং টেস্ট দিই','Take a typing test')}</button>
       <button class="btn btn-ghost" data-go="arcade">🎮 ${L('গেম খেলি','Play the game')}</button>
+      <a class="btn btn-ghost" href="hands.html" style="text-decoration:none;">✋ ${L('আঙুল গাইড','Finger guide')}</a>
     </div>
   </section>
   <div class="stripbox">
@@ -1053,7 +1054,8 @@ function screenChart(){
     <h2 class="section-title">Keyboard & Finger Chart</h2>
     <p class="section-sub">The standard QWERTY layout. The coloured dot on each key shows which finger should press it. Keep your fingers on the home row (A S D F — J K L ;).</p>
     <div class="card" style="margin-bottom:18px;display:flex;flex-wrap:wrap;gap:14px;font-size:13px;">${legend}</div>
-    <div class="kbwrap"><div id="kbHolderChart"></div></div>`;
+    <div class="kbwrap"><div id="kbHolderChart"></div></div>
+    <p style="margin-top:18px;"><a class="btn btn-primary" href="hands.html" style="text-decoration:none;">✋ Open the animated finger guide →</a></p>`;
   }
   function row(keys){
     return keys.map(k=>{
@@ -1074,6 +1076,7 @@ function screenChart(){
     </tbody>
   </table></div>
   <div class="kbwrap"><div id="kbHolderChart"></div></div>
+  <p style="margin-top:18px;"><a class="btn btn-primary" href="hands.html" style="text-decoration:none;">✋ আঙুলের নড়াচড়া দেখানো গাইড খুলুন →</a></p>
   `;
 }
 

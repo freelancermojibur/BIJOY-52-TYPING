@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>আঙুল গাইড — টাইপ শিখি</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Tiro+Bangla&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#141b2b; --bg2:#1c2538; --panel:#4a5160; --text:#e8ecf3; --dim:#9aa3b5; --gold:#e3b23c;
+  --red:#ef5b5b; --green:#3fcf8e; --blue:#3ba7f0;
+  --z0:#7a2b3a; --z1:#7a3a4a; --z2:#6b4a2e; --z3:#25603f; --z4:#1f3f8a; --z5:#4b2a8a; --z6:#6b2560; --z7:#7a2840; --z8:#2d4a6b;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;}
+body{background:radial-gradient(1000px 600px at 50% -10%, #22304a 0%, var(--bg) 60%) fixed;color:var(--text);font-family:'Hind Siliguri',sans-serif;min-height:100vh;}
+a{color:inherit;}
+.wrap{max-width:1180px;margin:0 auto;padding:16px;}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.brand .mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(155deg,var(--gold),#b9862c);color:#18231d;display:flex;align-items:center;justify-content:center;font-family:'Tiro Bangla',serif;font-size:20px;}
+.brand b{font-size:18px;}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.seg{display:flex;background:var(--bg2);border:1px solid #ffffff1f;border-radius:999px;padding:3px;}
+.seg button{border:none;background:transparent;color:var(--dim);padding:7px 13px;border-radius:999px;font:600 13.5px 'Hind Siliguri',sans-serif;cursor:pointer;}
+.seg button.on{background:var(--gold);color:#18231d;}
+select{background:var(--bg2);color:var(--text);border:1px solid #ffffff1f;border-radius:10px;padding:8px 10px;font:500 14px 'Hind Siliguri',sans-serif;max-width:260px;}
+.btn{border:1px solid #ffffff2a;background:var(--bg2);color:var(--text);border-radius:10px;padding:8px 14px;font:600 14px 'Hind Siliguri',sans-serif;cursor:pointer;text-decoration:none;}
+.monitor{background:#232b3d;border:1px solid #ffffff14;border-radius:22px;padding:18px;box-shadow:0 20px 50px #0008;position:relative;overflow:hidden;}
+.progress{position:absolute;left:0;top:0;height:4px;background:var(--blue);width:0;transition:width .2s;}
+.screen{background:var(--panel);border-radius:6px;padding:18px 26px 26px;}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+.stat small{display:block;font-size:11.5px;letter-spacing:1px;color:#c3c9d6;text-transform:uppercase;}
+.stat b{font-size:26px;font-weight:700;}
+.stat.bad b{color:var(--red);}
+.text{font-family:'JetBrains Mono',monospace;font-size:24px;line-height:1.75;text-align:center;color:#8d95a6;min-height:126px;max-height:126px;overflow:hidden;}
+.text.bn{font-family:'Tiro Bangla',serif;font-size:27px;}
+.text .w{display:inline-block;white-space:nowrap;}
+.text .c.ok{color:#fff;}
+.text .c.bad{color:var(--red);text-decoration:underline;}
+.text .c.cur{box-shadow:inset 2px 0 0 var(--blue);}
+.text.bn .w{display:inline;white-space:normal;}
+.text.bn .c.cur{box-shadow:none;background:#3ba7f055;border-radius:3px;}
+.hint{text-align:center;color:var(--dim);font-size:14px;margin-top:10px;min-height:22px;}
+.hint b{color:var(--gold);}
+
+/* ---------- keyboard + hands stage ---------- */
+.stagebox{margin-top:16px;position:relative;width:100%;}
+.stage{position:absolute;left:0;top:0;transform-origin:0 0;}
+.kbbase{position:absolute;background:#2a3245;border-radius:22px;border:1px solid #ffffff12;box-shadow:inset 0 2px 0 #ffffff10,0 14px 30px #0007;}
+.k{position:absolute;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ffffffd9;font:600 17px 'Hind Siliguri',sans-serif;
+  border-bottom:4px solid #0006;transition:filter .12s, transform .08s, box-shadow .12s;user-select:none;}
+.k .top{font-size:12px;opacity:.75;line-height:1;}
+.k .bnl{font-family:'Tiro Bangla',serif;font-size:21px;line-height:1.1;}
+.k .enl{font-size:10.5px;opacity:.6;position:absolute;left:7px;bottom:4px;}
+.k.ctrl{font-size:14px;}
+.k.next{filter:brightness(1.9) saturate(1.3);box-shadow:0 0 0 3px #fff,0 0 22px #ffffffaa;z-index:2;}
+.k.press{transform:translateY(3px);border-bottom-width:1px;}
+.k.wrong{background:var(--red)!important;filter:none;}
+.k.homebump::after{content:'';position:absolute;bottom:9px;width:16px;height:3px;border-radius:2px;background:#ffffff88;}
+svg.hands{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;}
+.finger{transition:transform .22s cubic-bezier(.3,.7,.3,1);}
+.finger .seg1{fill:url(#skin);stroke:#ffffff55;stroke-width:1.5;}
+.finger .tip{fill:#ffffff40;}
+.finger.active .seg1{fill:url(#skinHot);stroke:#fff;}
+.finger.active .tip{fill:#ffffffcc;}
+.palm{fill:url(#skin);stroke:#ffffff40;stroke-width:1.5;}
+.legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:12px;font-size:13px;color:var(--dim);}
+.legend span{display:inline-flex;align-items:center;gap:6px;}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block;}
+.done{position:absolute;inset:0;background:#141b2bee;display:none;align-items:center;justify-content:center;text-align:center;z-index:5;border-radius:22px;}
+.done.show{display:flex;}
+.done .big{font-size:58px;font-weight:700;color:var(--gold);}
+@media(max-width:700px){.text{font-size:18px;min-height:100px;max-height:100px}.text.bn{font-size:21px}.stat b{font-size:20px}.screen{padding:14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="index.html"><div class="mark">বি</div><b id="brandName">টাইপ শিখি</b></a>
+    <div class="ctrls">
+      <div class="seg" id="langSeg"><button data-l="bn">বাংলা (বিজয়)</button><button data-l="en">English</button></div>
+      <div class="seg" id="timeSeg"><button data-t="60">1m</button><button data-t="180">3m</button><button data-t="300">5m</button></div>
+      <select id="passSel"></select>
+      <button class="btn" id="restart">↻</button>
+      <a class="btn" href="index.html" id="backLink">← মূল সাইট</a>
+    </div>
+  </header>
+
+  <div class="monitor">
+    <div class="progress" id="progress"></div>
+    <div class="screen">
+      <div class="stats">
+        <div class="stat"><small>WPM</small><b id="sWpm">0</b></div>
+        <div class="stat" id="accBox"><small id="lAcc">নির্ভুলতা</small><b id="sAcc">100%</b></div>
+        <div class="stat" id="errBox"><small id="lErr">ভুল</small><b id="sErr">0</b></div>
+        <div class="stat"><small id="lTime">সময় বাকি</small><b id="sTime">1:00</b></div>
+      </div>
+      <div class="text" id="text"></div>
+      <div class="hint" id="hint"></div>
+    </div>
+    <div class="stagebox" id="stagebox"><div class="stage" id="stage"></div></div>
+    <div class="legend" id="legend"></div>
+    <div class="done" id="done"></div>
+  </div>
+</div>
+
+<script>
+/* ---------- কী-ম্যাপ (বিজয় ৫২) ---------- */
+const KEYMAP = {
+  '`':{base:'',shift:'',altgr:''},'1':{base:'১',shift:'!',altgr:''},'2':{base:'২',shift:'@',altgr:''},'3':{base:'৩',shift:'#',altgr:''},
+  '4':{base:'৪',shift:'৳',altgr:''},'5':{base:'৫',shift:'%',altgr:''},'6':{base:'৬',shift:'÷',altgr:''},'7':{base:'৭',shift:'ঁ',altgr:''},
+  '8':{base:'৮',shift:'×',altgr:''},'9':{base:'৯',shift:'(',altgr:''},'0':{base:'০',shift:')',altgr:''},'-':{base:'-',shift:'_',altgr:''},'=':{base:'=',shift:'+',altgr:''},
+  'q':{base:'ঙ',shift:'ং',altgr:''},'w':{base:'য',shift:'য়',altgr:''},'e':{base:'ড',shift:'ঢ',altgr:'ঈ'},'r':{base:'প',shift:'ফ',altgr:''},
+  't':{base:'ট',shift:'ঠ',altgr:''},'y':{base:'চ',shift:'ছ',altgr:''},'u':{base:'জ',shift:'ঝ',altgr:'ঊ'},'i':{base:'হ',shift:'ঞ',altgr:'ঐ'},
+  'o':{base:'গ',shift:'ঘ',altgr:'ঔ'},'p':{base:'ড়',shift:'ঢ়',altgr:''},'[':{base:'[',shift:'{',altgr:''},']':{base:']',shift:'}',altgr:''},'\\':{base:'ঃ',shift:'ৎ',altgr:''},
+  'a':{base:'ৃ',shift:'র্',altgr:'ঋ'},'s':{base:'ু',shift:'ূ',altgr:'উ'},'d':{base:'ি',shift:'ী',altgr:'ই'},'f':{base:'া',shift:'অ',altgr:'আ'},
+  'g':{base:'্',shift:'।',altgr:''},'h':{base:'ব',shift:'ভ',altgr:''},'j':{base:'ক',shift:'খ',altgr:''},'k':{base:'ত',shift:'থ',altgr:''},
+  'l':{base:'দ',shift:'ধ',altgr:''},';':{base:';',shift:':',altgr:''},"'":{base:"'",shift:'"',altgr:''},
+  'z':{base:'্র',shift:'্য',altgr:''},'x':{base:'ো',shift:'ৌ',altgr:'ও'},'c':{base:'ে',shift:'ৈ',altgr:'এ'},'v':{base:'র',shift:'ল',altgr:''},
+  'b':{base:'ন',shift:'ণ',altgr:''},'n':{base:'স',shift:'ষ',altgr:''},'m':{base:'ম',shift:'শ',altgr:''},',':{base:',',shift:'<',altgr:''},
+  '.':{base:'.',shift:'>',altgr:''},'/':{base:'/',shift:'?',altgr:''}
+};
+const EN_SHIFT = {'`':'~','1':'!','2':'@','3':'#','4':'$','5':'%','6':'^','7':'&','8':'*','9':'(','0':')','-':'_','=':'+','[':'{',']':'}','\\':'|',';':':',"'":'"',',':'<','.':'>','/':'?'};
+const CODE_TO_KEY = {Backquote:'`',Digit1:'1',Digit2:'2',Digit3:'3',Digit4:'4',Digit5:'5',Digit6:'6',Digit7:'7',Digit8:'8',Digit9:'9',Digit0:'0',Minus:'-',Equal:'=',
+  KeyQ:'q',KeyW:'w',KeyE:'e',KeyR:'r',KeyT:'t',KeyY:'y',KeyU:'u',KeyI:'i',KeyO:'o',KeyP:'p',BracketLeft:'[',BracketRight:']',Backslash:'\\',
+  KeyA:'a',KeyS:'s',KeyD:'d',KeyF:'f',KeyG:'g',KeyH:'h',KeyJ:'j',KeyK:'k',KeyL:'l',Semicolon:';',Quote:"'",
+  KeyZ:'z',KeyX:'x',KeyC:'c',KeyV:'v',KeyB:'b',KeyN:'n',KeyM:'m',Comma:',',Period:'.',Slash:'/',Space:' '};
+// আঙুল: 0 বাম কনিষ্ঠা … 3 বাম তর্জনী, 4 ডান তর্জনী … 7 ডান কনিষ্ঠা, 8 বাম বৃদ্ধাঙ্গুলি, 9 ডান বৃদ্ধাঙ্গুলি
+const FINGER = {'`':0,'1':0,'q':0,'a':0,'z':0,'LShift':0,'Tab':0,'Caps':0,'2':1,'w':1,'s':1,'x':1,'3':2,'e':2,'d':2,'c':2,
+  '4':3,'5':3,'r':3,'t':3,'f':3,'g':3,'v':3,'b':3,'6':4,'7':4,'y':4,'u':4,'h':4,'j':4,'n':4,'m':4,
+  '8':5,'i':5,'k':5,',':5,'9':6,'o':6,'l':6,'.':6,'0':7,'-':7,'=':7,'p':7,'[':7,']':7,'\\':7,';':7,"'":7,'/':7,'RShift':7,'Enter':7,'Bksp':7,' ':9};
+const HOME = ['a','s','d','f','j','k','l',';'];
+const ZONE = ['var(--z0)','var(--z1)','var(--z2)','var(--z3)','var(--z4)','var(--z5)','var(--z6)','var(--z7)','var(--z8)','var(--z8)'];
+const FNAME = {bn:['বাম কনিষ্ঠা','বাম অনামিকা','বাম মধ্যমা','বাম তর্জনী','ডান তর্জনী','ডান মধ্যমা','ডান অনামিকা','ডান কনিষ্ঠা','বৃদ্ধাঙ্গুলি','বৃদ্ধাঙ্গুলি'],
+  en:['Left little','Left ring','Left middle','Left index','Right index','Right middle','Right ring','Right little','Thumb','Thumb']};
+
+/* ---------- কীবোর্ড জ্যামিতি ---------- */
+const U=64, GAP=6, PAD=18;
+const ROWS = [
+  [['`',1],['1',1],['2',1],['3',1],['4',1],['5',1],['6',1],['7',1],['8',1],['9',1],['0',1],['-',1],['=',1],['Bksp',2]],
+  [['Tab',1.5],['q',1],['w',1],['e',1],['r',1],['t',1],['y',1],['u',1],['i',1],['o',1],['p',1],['[',1],[']',1],['\\',1.5]],
+  [['Caps',1.75],['a',1],['s',1],['d',1],['f',1],['g',1],['h',1],['j',1],['k',1],['l',1],[';',1],["'",1],['Enter',2.25]],
+  [['LShift',2.25],['z',1],['x',1],['c',1],['v',1],['b',1],['n',1],['m',1],[',',1],['.',1],['/',1],['RShift',2.75]],
+  [['Ctrl',1.5],['Alt',1.25],[' ',6.25],['AltGr',1.25],['Ctrl2',1.5]]
+];
+const KEYPOS={};
+(function(){
+  ROWS.forEach((row,r)=>{
+    let x=PAD;
+    if(r===4) x = PAD + 2*U;
+    row.forEach(([id,w])=>{
+      KEYPOS[id]={x, y:PAD + r*U, w:w*U-GAP, h:U-GAP, cx:x+(w*U-GAP)/2, cy:PAD+r*U+(U-GAP)/2};
+      x+=w*U;
+    });
+  });
+})();
+const KB_W = PAD*2 + 15*U - GAP, KB_H = PAD*2 + 5*U - GAP;
+const HAND_H = 300; // কীবোর্ডের নিচে হাতের জন্য জায়গা
+const CTRL_TXT = {Bksp:'Backspace',Tab:'Tab',Caps:'Caps',Enter:'Enter',LShift:'Shift',RShift:'Shift',Ctrl:'Ctrl',Alt:'Alt',AltGr:'AltGr',Ctrl2:'Ctrl',' ':''};
+
+/* ---------- লেখা ---------- */
+const PASS = {
+  en:[
+    {t:'All letters (pangrams)', x:'The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump; sphinx of black quartz, judge my vow.'},
+    {t:'Pride and Prejudice — Jane Austen', x:'It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.'},
+    {t:'A Tale of Two Cities — Charles Dickens', x:'It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity.'},
+    {t:'Moby-Dick — Herman Melville', x:'Call me Ishmael. Some years ago, never mind how long precisely, having little or no money in my purse, I thought I would sail about a little and see the watery part of the world.'},
+    {t:'Home row drill', x:'a sad lad asks dad; all lads fall; a glad lass has a flask; dad adds salad as lads laugh.'}
+  ],
+  bn:[
+    {t:'হোম রো অনুশীলন', x:'কাকা দাদা কাদা দাদু বাবা কাক তাক কাকি দাদি বাদ'},
+    {t:'আমার সোনার বাংলা — রবীন্দ্রনাথ ঠাকুর', x:'আমার সোনার বাংলা, আমি তোমায় ভালোবাসি। চিরদিন তোমার আকাশ, তোমার বাতাস, আমার প্রাণে বাজায় বাঁশি।'},
+    {t:'একলা চলো রে — রবীন্দ্রনাথ ঠাকুর', x:'যদি তোর ডাক শুনে কেউ না আসে তবে একলা চলো রে। যদি কেউ কথা না কয়, ওরে ওরে ও অভাগা।'},
+    {t:'সব কী — পূর্ণ বর্ণমালা', x:'ঝড়ের রাতে ঢাকার পথে এক ক্ষুধার্ত বৃদ্ধ ঠাকুরমা ঘোড়ায় চড়ে গঞ্জে যাচ্ছিলেন; হঠাৎ ছায়ামূর্তি ভেসে উঠল। দুঃখী ঋষি বললেন, "ভয় নেই, সৌভাগ্য আসবে।"'},
+    {t:'আবার আসিব ফিরে — জীবনানন্দ দাশ', x:'আবার আসিব ফিরে ধানসিড়িটির তীরে, এই বাংলায়; হয়তো মানুষ নয়, হয়তো বা শঙ্খচিল শালিখের বেশে।'}
+  ]
+};
+const BN_REVERSE=(()=>{const m={};Object.entries(KEYMAP).forEach(([k,v])=>{['altgr','shift','base'].forEach(l=>{if(v[l]) m[v[l]]={key:k,layer:l};});});return m;})();
+function tokenize(text, lang){
+  const out=[]; let i=0;
+  while(i<text.length){
+    const ch=text[i];
+    if(ch===' '){ out.push({key:' ',layer:'base',char:' '}); i++; continue; }
+    if(lang==='en'){
+      let key=null, layer='base';
+      if(/[a-z0-9]/.test(ch) || KEYMAP[ch]) key=ch;
+      else if(/[A-Z]/.test(ch)){ key=ch.toLowerCase(); layer='shift'; }
+      else { const e=Object.entries(EN_SHIFT).find(([,v])=>v===ch); if(e){ key=e[0]; layer='shift'; } }
+      if(key) out.push({key,layer,char:ch}); i++; continue;
+    }
+    let hit=null; for(const len of [2,1]){ const s=text.substr(i,len); if(s.length===len && BN_REVERSE[s]){ hit=s; break; } }
+    if(!hit){ i++; continue; }
+    out.push(Object.assign({char:hit}, BN_REVERSE[hit])); i+=hit.length;
+  }
+  return out;
+}
+
+/* ---------- অবস্থা ---------- */
+const S = { lang: (()=>{ try{ return JSON.parse(localStorage.getItem('bijoy_shikhi_v1')||'{}').lang==='en'?'en':'bn'; }catch(e){ return 'bn'; } })(),
+  dur:180, pass:0, tokens:[], pos:0, ok:0, bad:0, start:0, timer:null, over:false };
+const T = (bn,en)=> S.lang==='en'?en:bn;
+
+/* ---------- কীবোর্ড আঁকা ---------- */
+function buildStage(){
+  const st=document.getElementById('stage');
+  let html=`<div class="kbbase" style="left:0;top:0;width:${KB_W}px;height:${KB_H}px"></div>`;
+  Object.entries(KEYPOS).forEach(([id,p])=>{
+    const f=FINGER[id]; const bg = f===undefined ? '#3a4255' : ZONE[f];
+    let inner='';
+    if(CTRL_TXT[id]!==undefined){ inner=CTRL_TXT[id]; }
+    else if(S.lang==='bn' && KEYMAP[id]){
+      const km=KEYMAP[id];
+      inner = `<span class="top">${km.shift||''}</span><span class="bnl">${km.base||id}</span><span class="enl">${id.toUpperCase()}</span>`;
+    } else {
+      inner = /[a-z]/.test(id) ? id.toUpperCase() : `<span class="top">${EN_SHIFT[id]||''}</span>${id}`;
+    }
+    const cls = 'k'+(CTRL_TXT[id]!==undefined?' ctrl':'')+((id==='f'||id==='j')?' homebump':'');
+    html+=`<div class="${cls}" data-k="${id}" style="left:${p.x}px;top:${p.y}px;width:${p.w}px;height:${p.h}px;background:${bg}">${inner}</div>`;
+  });
+  html += handsSVG();
+  st.innerHTML=html;
+  st.style.width=KB_W+'px'; st.style.height=(KB_H+120)+'px';
+  fitStage();
+}
+// আঙুলের দৈর্ঘ্য ও প্রস্থ (কনিষ্ঠা→তর্জনী)
+const FLEN=[118,140,150,140], FW=[40,45,47,47];
+function handsSVG(){
+  let s=`<svg class="hands" width="${KB_W}" height="${KB_H+HAND_H}" viewBox="0 0 ${KB_W} ${KB_H+HAND_H}">
+    <defs>
+      <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f0ff" stop-opacity=".62"/><stop offset="1" stop-color="#b8c8f0" stop-opacity=".42"/></linearGradient>
+      <linearGradient id="skinHot" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7a7a" stop-opacity=".9"/><stop offset="1" stop-color="#e8f0ff" stop-opacity=".55"/></linearGradient>
+    </defs>`;
+  for(let f=0; f<8; f++){
+    const p=KEYPOS[HOME[f]]; const idx = f<4 ? f : 7-f; const len=FLEN[idx], w=FW[idx];
+    s+=`<g class="finger" id="fg${f}"><rect class="seg1" x="${p.cx-w/2}" y="${p.cy-w/2}" width="${w}" height="${len}" rx="${w/2}"/><ellipse class="tip" cx="${p.cx}" cy="${p.cy+2}" rx="${w/2-8}" ry="${w/2-10}"/></g>`;
+  }
+  // পাম (হাতের তালু)
+  const L0=KEYPOS['a'], L3=KEYPOS['f'], R4=KEYPOS['j'], R7=KEYPOS[';'];
+  const py=L0.cy+92, ph=118;
+  const palm=(x1,x2,inner)=>`<path class="palm" d="M${x1},${py} C${x1-6},${py+ph*0.6} ${x1+20},${py+ph} ${(x1+x2)/2},${py+ph} C${x2+(inner>0?30:-20)},${py+ph} ${x2+(inner>0?14:6)},${py+ph*0.5} ${x2},${py} Z"/>`;
+  s+=palm(L0.cx-24, L3.cx+28, 1);
+  s+=palm(R4.cx-28, R7.cx+24, -1).replace(/C(\S+) (\S+) /,'C$1 $2 ');
+  // বৃদ্ধাঙ্গুলি
+  const sp=KEYPOS[' '];
+  s+=`<g class="finger" id="fg8"><rect class="seg1" x="${sp.x+sp.w*0.28-26}" y="${sp.cy-24}" width="50" height="120" rx="25" transform="rotate(38 ${sp.x+sp.w*0.28} ${sp.cy})"/><ellipse class="tip" cx="${sp.x+sp.w*0.28}" cy="${sp.cy}" rx="16" ry="14"/></g>`;
+  s+=`<g class="finger" id="fg9"><rect class="seg1" x="${sp.x+sp.w*0.72-26}" y="${sp.cy-24}" width="50" height="120" rx="25" transform="rotate(-38 ${sp.x+sp.w*0.72} ${sp.cy})"/><ellipse class="tip" cx="${sp.x+sp.w*0.72}" cy="${sp.cy}" rx="16" ry="14"/></g>`;
+  return s+'</svg>';
+}
+function fitStage(){
+  const box=document.getElementById('stagebox'), st=document.getElementById('stage');
+  const sc=Math.min(1, box.clientWidth/KB_W);
+  st.style.transform=`scale(${sc})`;
+  box.style.height=((KB_H+120)*sc)+'px';
+}
+window.addEventListener('resize', fitStage);
+
+/* ---------- আঙুল সরানো ---------- */
+function moveFingers(tok){
+  for(let f=0;f<10;f++){ const g=document.getElementById('fg'+f); if(g){ g.style.transform=''; g.classList.remove('active'); } }
+  document.querySelectorAll('.k.next').forEach(e=>e.classList.remove('next'));
+  if(!tok) return;
+  const f=FINGER[tok.key];
+  const targets=[[tok.key,f]];
+  if(tok.layer==='shift') targets.push(f<=3 ? ['RShift',7] : ['LShift',0]);
+  if(tok.layer==='altgr') targets.push(['AltGr',9]);
+  targets.forEach(([k,fi])=>{
+    const el=document.querySelector(`.k[data-k="${CSS.escape(k)}"]`); if(el) el.classList.add('next');
+    const g=document.getElementById('fg'+fi); if(!g) return;
+    g.classList.add('active');
+    if(fi>=8) return;
+    const home=KEYPOS[HOME[fi]], to=KEYPOS[k];
+    let dx=to.cx-home.cx, dy=to.cy-home.cy;
+    if(k==='LShift') dx=to.x+40-home.cx; if(k==='RShift') dx=to.x+40-home.cx;
+    if(k==='Enter'||k==='Bksp') dx=to.x+36-home.cx;
+    g.style.transform=`translate(${dx}px,${dy}px)`;
+  });
+  const fi=FINGER[tok.key];
+  const keyName = tok.key===' ' ? 'Space' : (tok.layer==='shift'?'Shift + ':'')+(tok.layer==='altgr'?'AltGr + ':'')+tok.key.toUpperCase();
+  document.getElementById('hint').innerHTML = `<b>${keyName}</b> — ${FNAME[S.lang][fi]}`;
+}
+
+/* ---------- টাইপিং ---------- */
+function renderText(){
+  const box=document.getElementById('text');
+  box.className='text'+(S.lang==='bn'?' bn':'');
+  let h='<span class="w">';
+  S.tokens.forEach((t,i)=>{
+    if(t.char===' ') h+='</span> <span class="w">';
+    else h+=`<span class="c ${t.st||''}${i===S.pos?' cur':''}">${t.char}</span>`;
+    if(t.char===' ' && i===S.pos) h=h.replace(/ <span class="w">$/,'<span class="c cur">&nbsp;</span><span class="w">');
+  });
+  box.innerHTML=h+'</span>';
+  const cur=box.querySelector('.cur');
+  if(cur){ const lh=parseFloat(getComputedStyle(box).lineHeight); box.scrollTop=Math.max(0, cur.offsetTop-box.offsetTop-lh); }
+}
+function stats(){
+  const mins=S.start?(Date.now()-S.start)/60000:0;
+  const wpm = mins>0.02 ? Math.round((S.ok/5)/mins) : 0;
+  const acc = S.ok+S.bad ? Math.round(S.ok/(S.ok+S.bad)*100) : 100;
+  document.getElementById('sWpm').textContent=wpm;
+  document.getElementById('sAcc').textContent=acc+'%';
+  document.getElementById('sErr').textContent=S.bad;
+  document.getElementById('accBox').classList.toggle('bad', acc<90);
+  document.getElementById('errBox').classList.toggle('bad', S.bad>0);
+  const left = S.start ? Math.max(0, S.dur - Math.floor((Date.now()-S.start)/1000)) : S.dur;
+  document.getElementById('sTime').textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
+  document.getElementById('progress').style.width = (S.start ? (1-left/S.dur)*100 : 0)+'%';
+  return {wpm,acc,left};
+}
+function reset(){
+  clearInterval(S.timer); S.timer=null; S.over=false;
+  let toks=[]; const src=PASS[S.lang][S.pass].x;
+  while(toks.length < 1200){ if(toks.length) toks.push({key:' ',layer:'base',char:' '}); toks=toks.concat(tokenize(src,S.lang)); }
+  S.tokens=toks; S.pos=0; S.ok=0; S.bad=0; S.start=0;
+  document.getElementById('done').classList.remove('show');
+  renderText(); stats(); moveFingers(S.tokens[0]);
+}
+function finish(){
+  S.over=true; clearInterval(S.timer);
+  const r=stats(); moveFingers(null);
+  const d=document.getElementById('done');
+  d.innerHTML=`<div><div style="color:var(--dim)">${T('সময় শেষ','Time is up')}</div><div class="big">${r.wpm} WPM</div>
+    <div style="color:var(--dim)">${T('নির্ভুলতা','Accuracy')} ${r.acc}% · ${T('ভুল','Errors')} ${S.bad}</div>
+    <div style="margin-top:16px"><button class="btn" onclick="reset()">↻ ${T('আবার চেষ্টা করি','Try again')}</button></div></div>`;
+  d.classList.add('show');
+}
+function flash(k,cls){ const el=document.querySelector(`.k[data-k="${CSS.escape(k)}"]`); if(!el) return; el.classList.add(cls); setTimeout(()=>el.classList.remove(cls),cls==='wrong'?260:110); }
+document.addEventListener('keydown', e=>{
+  if(S.over) return;
+  if(e.target.tagName==='SELECT') return;
+  const altgr=(e.getModifierState&&e.getModifierState('AltGraph'))||(e.ctrlKey&&e.altKey);
+  if((e.ctrlKey||e.metaKey)&&!altgr) return;
+  if(e.key==='Backspace'){ e.preventDefault(); if(S.pos>0){ S.pos--; const t=S.tokens[S.pos]; if(t.st==='ok') S.ok--; else if(t.st==='bad') S.bad--; t.st=''; renderText(); moveFingers(S.tokens[S.pos]); stats(); } return; }
+  const keyId=CODE_TO_KEY[e.code]; if(keyId===undefined) return;
+  e.preventDefault();
+  if(!S.start){ S.start=Date.now(); S.timer=setInterval(()=>{ if(stats().left<=0) finish(); },250); }
+  const tok=S.tokens[S.pos];
+  let typed;
+  if(keyId===' ') typed=' ';
+  else if(S.lang==='en') typed=e.key;
+  else typed=KEYMAP[keyId][altgr?'altgr':(e.shiftKey?'shift':'base')];
+  const okk = typed===tok.char;
+  tok.st = okk?'ok':'bad'; okk?S.ok++:S.bad++;
+  flash(keyId, okk?'press':'wrong');
+  S.pos++; renderText(); moveFingers(S.tokens[S.pos]); stats();
+});
+
+/* ---------- UI ---------- */
+function applyLang(){
+  document.documentElement.lang=S.lang;
+  document.title = T('আঙুল গাইড — টাইপ শিখি','Finger Guide — TypeShikhi');
+  document.getElementById('brandName').textContent=T('টাইপ শিখি — আঙুল গাইড','TypeShikhi — Finger Guide');
+  document.getElementById('backLink').textContent=T('← মূল সাইট','← Main site');
+  document.getElementById('lAcc').textContent=T('নির্ভুলতা','Accuracy');
+  document.getElementById('lErr').textContent=T('ভুল','Errors');
+  document.getElementById('lTime').textContent=T('সময় বাকি','Time left');
+  document.querySelectorAll('#langSeg button').forEach(b=>b.classList.toggle('on', b.dataset.l===S.lang));
+  document.querySelectorAll('#timeSeg button').forEach(b=>b.classList.toggle('on', +b.dataset.t===S.dur));
+  document.getElementById('passSel').innerHTML = PASS[S.lang].map((p,i)=>`<option value="${i}" ${i===S.pass?'selected':''}>${p.t}</option>`).join('');
+  document.getElementById('legend').innerHTML = [0,1,2,3,4,5,6,7,8].map(i=>`<span><i style="background:${ZONE[i]}"></i>${FNAME[S.lang][i]}</span>`).join('');
+  buildStage(); reset();
+}
+document.querySelectorAll('#langSeg button').forEach(b=>b.onclick=()=>{ S.lang=b.dataset.l; S.pass=0; applyLang(); b.blur(); });
+document.querySelectorAll('#timeSeg button').forEach(b=>b.onclick=()=>{ S.dur=+b.dataset.t; applyLang(); b.blur(); });
+document.getElementById('passSel').onchange=e=>{ S.pass=+e.target.value; reset(); e.target.blur(); };
+document.getElementById('restart').onclick=e=>{ reset(); e.target.blur(); };
+applyLang();
+</script>
+</body>
+</html>
