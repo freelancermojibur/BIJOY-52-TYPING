@@ -2,8 +2,9 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>টাইপ শিখি — বাংলা (বিজয় ৫২) ও ইংরেজি টাইপিং শেখার প্ল্যাটফর্ম</title>
+<title>টাইপিং শিখুন — বাংলা (বিজয় ৫২) ও ইংরেজি টাইপিং শেখার প্ল্যাটফর্ম</title>
 <meta name="description" content="বিজয় ৫২ বাংলা ও ইংরেজি টাইপিং শিখুন, টাইপিং টেস্ট দিন এবং গেম খেলে গতি বাড়ান।">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -323,6 +324,8 @@ html,body{overflow-x:hidden;}
 .content > p{text-align:center;}
 .content > .card{margin-left:auto;margin-right:auto;}
 @media(max-width:600px){.brand .name small{display:none;}}
+.logo{width:42px;height:42px;border-radius:12px;flex-shrink:0;box-shadow:0 6px 16px rgba(0,0,0,.35);display:block;}
+.credit{opacity:.85;}
 </style>
 </head>
 <body>
@@ -1145,7 +1148,7 @@ function navHTML(){
 function topbarHTML(){
   return `
   <div class="topbar">
-    <div class="brand" data-go="home"><div class="mark">${L('বি','T')}</div><div class="name">${L('টাইপ শিখি','TypeShikhi')}<small>BANGLA · ENGLISH TYPING</small></div></div>
+    <div class="brand" data-go="home"><img class="logo" src="icon.svg" alt="" width="42" height="42"><div class="name">${L('টাইপিং শিখুন','Typing Shikhun')}<small>${L('শিল্পী বিল্ডারের সৌজন্যে','Courtesy of Shilpi Builder')}</small></div></div>
     <nav class="tabs">${navHTML()}</nav>
     <div class="topbar-right">
       <div class="langswitch" title="Language / ভাষা">
@@ -1161,7 +1164,7 @@ function render(){
   stopTimers();
   document.documentElement.lang = state.lang;
   document.body.classList.toggle('lang-en', state.lang==='en');
-  document.title = L('টাইপ শিখি — বাংলা (বিজয় ৫২) ও ইংরেজি টাইপিং শেখার প্ল্যাটফর্ম','TypeShikhi — Learn English & Bangla Typing');
+  document.title = L('টাইপিং শিখুন — বাংলা (বিজয় ৫২) ও ইংরেজি টাইপিং শেখার প্ল্যাটফর্ম','Typing Shikhun — Learn English & Bangla Typing');
   const list = LESSON_LIST();
   if(state.lessonIdx >= list.length) state.lessonIdx = 0;
   const lesson = list[state.lessonIdx];
@@ -1183,7 +1186,7 @@ function render(){
   else if(state.screen==='arcadePlay') body=screenArcadePlay();
 
   document.getElementById('app').innerHTML = topbarHTML() + `<div class="content">${body}</div>` +
-    `<footer class="pagefoot">© ${new Date().getFullYear()} ${L('টাইপ শিখি — বাংলা ও ইংরেজি টাইপিং, মৌলিক থেকে দক্ষতা পর্যন্ত।','TypeShikhi — English & Bangla typing, from basics to mastery.')}</footer>`;
+    `<footer class="pagefoot">© ${new Date().getFullYear()} ${L('টাইপিং শিখুন — শিল্পী বিল্ডারের সৌজন্যে।','Typing Shikhun — Courtesy of Shilpi Builder.')}</footer>`;
 
   bindGlobalNav();
 

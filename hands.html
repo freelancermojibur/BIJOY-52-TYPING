@@ -2,8 +2,9 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>আঙুল গাইড — টাইপ শিখি</title>
+<title>আঙুল গাইড — টাইপিং শিখুন</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Tiro+Bangla&display=swap" rel="stylesheet">
 <style>
@@ -73,12 +74,14 @@ svg.hands{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;}
 .done.show{display:flex;}
 .done .big{font-size:58px;font-weight:700;color:var(--gold);}
 @media(max-width:700px){.text{font-size:18px;min-height:100px;max-height:100px}.text.bn{font-size:21px}.stat b{font-size:20px}.screen{padding:14px}}
+.logo{width:42px;height:42px;border-radius:12px;flex-shrink:0;box-shadow:0 6px 16px rgba(0,0,0,.35);display:block;}
+.credit{opacity:.85;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <a class="brand" href="index.html"><div class="mark">বি</div><b id="brandName">টাইপ শিখি</b></a>
+    <a class="brand" href="index.html"><img class="logo" src="icon.svg" alt="" width="42" height="42"><b id="brandName">টাইপিং শিখুন</b></a>
     <div class="ctrls">
       <div class="seg" id="langSeg"><button data-l="bn">বাংলা (বিজয়)</button><button data-l="en">English</button></div>
       <div class="seg" id="timeSeg"><button data-t="60">1m</button><button data-t="180">3m</button><button data-t="300">5m</button></div>
@@ -392,8 +395,8 @@ document.addEventListener('keydown', e=>{
 /* ---------- UI ---------- */
 function applyLang(){
   document.documentElement.lang=S.lang;
-  document.title = T('আঙুল গাইড — টাইপ শিখি','Finger Guide — TypeShikhi');
-  document.getElementById('brandName').textContent=T('টাইপ শিখি — আঙুল গাইড','TypeShikhi — Finger Guide');
+  document.title = T('আঙুল গাইড — টাইপিং শিখুন','Finger Guide — Typing Shikhun');
+  document.getElementById('brandName').textContent=T('টাইপিং শিখুন — শিল্পী বিল্ডারের সৌজন্যে','Typing Shikhun — Courtesy of Shilpi Builder');
   document.getElementById('backLink').textContent=T('← মূল সাইট','← Main site');
   document.getElementById('lAcc').textContent=T('নির্ভুলতা','Accuracy');
   document.getElementById('lErr').textContent=T('ভুল','Errors');
