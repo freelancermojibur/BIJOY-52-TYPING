@@ -301,6 +301,28 @@ body.lang-en .brand .mark{font-family:'Hind Siliguri',sans-serif;font-weight:700
 .typebox:not(.en) .tk.current{background:rgba(227,178,60,0.45);box-shadow:0 3px 0 var(--gold);}
 .typebox:not(.en) .tk.current::after{display:none;}
 .typebox:not(.en) .tk.wrong{background:rgba(226,84,75,0.22);}
+/* ---------- হেডার: পুরো প্রস্থে ব্যাকগ্রাউন্ড ---------- */
+.topbar{background:none;backdrop-filter:none;position:sticky;}
+.topbar::before{content:'';position:absolute;top:0;bottom:0;left:50%;width:100vw;transform:translateX(-50%);
+  background:rgba(14,33,27,0.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:-1;}
+.topbar{margin-bottom:18px;}
+html,body{overflow-x:hidden;}
+/* ---------- পেজের কনটেন্ট মাঝখানে ---------- */
+.section-title{text-align:center;}
+.section-sub{text-align:center;margin-left:auto;margin-right:auto;}
+.hero{text-align:center;}
+.hero h1,.hero p{margin-left:auto;margin-right:auto;}
+.hero .ctas{justify-content:center;}
+.stripbox{justify-content:center;gap:48px;}
+.testsetup{margin:0 auto;}
+.content > .btn-primary,.content > button.btn-primary{display:flex;width:fit-content;margin-left:auto;margin-right:auto;}
+.content > .pill{display:flex;width:fit-content;margin:0 auto;}
+.newkeys-strip,.wordlist-preview{justify-content:center;}
+.lesson-row{max-width:860px;margin-left:auto;margin-right:auto;}
+.content > h3{text-align:center;}
+.content > p{text-align:center;}
+.content > .card{margin-left:auto;margin-right:auto;}
+@media(max-width:600px){.brand .name small{display:none;}}
 </style>
 </head>
 <body>
