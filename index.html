@@ -282,6 +282,16 @@ footer.pagefoot{text-align:center;color:var(--text-dim);font-size:12.5px;padding
 .arc-typed{text-align:center;font-family:'Tiro Bangla',serif;font-size:26px;color:var(--gold);min-height:40px;margin-top:10px;}
 @media(max-width:760px){ .arena{height:340px;} nav.tabs{overflow-x:auto;} nav.tabs button{font-size:11.5px;padding:10px 4px;} }
 
+/* ---------- language switch ---------- */
+.langswitch{display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:3px;}
+.langswitch button{border:none;background:transparent;color:var(--text-dim);padding:6px 11px;border-radius:999px;font-size:13px;font-weight:700;}
+.langswitch button.on{background:var(--gold);color:var(--ink);}
+body.lang-en h1,body.lang-en h2,body.lang-en h3,body.lang-en .display,body.lang-en .brand .name{font-family:'Hind Siliguri',sans-serif;font-weight:700;}
+body.lang-en .brand .mark{font-family:'Hind Siliguri',sans-serif;font-weight:700;}
+.enfont{font-family:'Hind Siliguri',sans-serif !important;font-weight:600;}
+.fleg{display:inline-flex;align-items:center;gap:6px;color:var(--text-dim);}
+.fleg .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+@media(max-width:760px){.langswitch button{padding:5px 8px;font-size:12px;}}
 </style>
 </head>
 <body>
@@ -337,6 +347,7 @@ const FINGER = {
   ' ':8
 };
 const FINGER_COLOR = ['var(--f0)','var(--f1)','var(--f2)','var(--f3)','var(--f4)','var(--f5)','var(--f6)','var(--f7)','var(--f8)'];
+const FINGER_NAME_EN = ['Left little','Left ring','Left middle','Left index','Right index','Right middle','Right ring','Right little','Thumb'];
 const FINGER_NAME = ['বাম কনিষ্ঠা','বাম অনামিকা','বাম মধ্যমা','বাম তর্জনী','ডান তর্জনী','ডান মধ্যমা','ডান অনামিকা','ডান কনিষ্ঠা','বৃদ্ধাঙ্গুলি'];
 
 const KEY_ROWS = [
@@ -475,7 +486,7 @@ class TypingSession{
   summary(){
     return { wpm:this.wpm(), accuracy:this.accuracy(), correct:this.correct, wrong:this.wrong,
       maxCombo:this.maxCombo, timeSec:Math.round(((this.endTime||Date.now())-(this.startTime||Date.now()))/1000)||0,
-      mistakes:this.lang==='en'?{}:this.mistakes, lang:this.lang };
+      mistakes:this.mistakes, lang:this.lang };
   }
 }
 
@@ -490,9 +501,11 @@ function loadDB(){
 function saveDB(db){ try{ localStorage.setItem(LS_KEY, JSON.stringify(db)); }catch(e){} }
 let DB = loadDB();
 function recordSession(kind, label, summary){
-  DB.history.unshift({ kind, label, wpm:summary.wpm, accuracy:summary.accuracy, time:summary.timeSec, date:Date.now() });
-  DB.history = DB.history.slice(0,60);
-  Object.keys(summary.mistakes).forEach(k=>{ DB.mistakes[k]=(DB.mistakes[k]||0)+summary.mistakes[k]; });
+  const lang = summary.lang || state.lang;
+  DB.history.unshift({ kind, label, lang, wpm:summary.wpm, accuracy:summary.accuracy, time:summary.timeSec, date:Date.now() });
+  DB.history = DB.history.slice(0,100);
+  const bucket = lang==='en' ? (DB.mistakesEn = DB.mistakesEn||{}) : DB.mistakes;
+  Object.keys(summary.mistakes||{}).forEach(k=>{ bucket[k]=(bucket[k]||0)+summary.mistakes[k]; });
   saveDB(DB);
 }
 function markLessonDone(id, wpm){
@@ -524,7 +537,7 @@ function sndDone(){ beep(500,0.1,'sine'); setTimeout(()=>beep(700,0.16,'sine'),9
 /* =========================================================================
    ৬) STATE + ROUTER
    ========================================================================= */
-const state = { screen:'home', lessonIdx:0, session:null, roundKind:null, roundLabel:'', vShift:false, vAltgr:false, showAltgr:false };
+const state = { lang:(DB.lang==='en'?'en':'bn'), screen:'home', lessonIdx:0, session:null, roundKind:null, roundLabel:'', vShift:false, vAltgr:false, showAltgr:false };
 function go(screen, extra){ state.screen=screen; Object.assign(state, extra||{}); render(); window.scrollTo({top:0,behavior:'smooth'}); }
 
 /* =========================================================================
@@ -559,7 +572,7 @@ function renderKeyboard(expected, opts){
         cls+=' w-space';
         let active = expected && expected.key===' ';
         if(active) cls+=' active';
-        html += `<div class="${cls}" style="flex:${w}"><button data-key=" " style="width:100%;height:100%;">স্পেস</button></div>`;
+        html += `<div class="${cls}" style="flex:${w}"><button data-key=" " style="width:100%;height:100%;">${L('স্পেস','Space')}</button></div>`;
         return;
       }
       const km = KEYMAP[id];
@@ -630,7 +643,7 @@ function nextKeyHint(session){
     const fi = FINGER[cur.key]!==undefined ? FINGER[cur.key] : 8;
     const lbl = cur.char===' ' ? 'Space' : ((cur.layer==='shift'?'Shift + ':'') + (/[a-z]/.test(cur.key)?cur.key.toUpperCase():(EN_KEYS[cur.key]||[cur.key])[0]));
     return `<div class="nextkey-hint"><div class="badge" style="background:${FINGER_COLOR[fi]}">${cur.char===' '?'␣':cur.char}</div>
-      <span><b>${lbl}</b> চাপুন</span><span class="muted" style="margin-left:auto;font-size:12px;">${FINGER_NAME[fi]}</span></div>`;
+      <span>${L('','Press ')}<b>${lbl}</b>${L(' চাপুন','')}</span><span class="muted" style="margin-left:auto;font-size:12px;">${L(FINGER_NAME[fi],FINGER_NAME_EN[fi])}</span></div>`;
   }
   if(cur.key===' '){
     return `<div class="nextkey-hint"><div class="badge" style="background:${FINGER_COLOR[8]}">␣</div>
@@ -649,9 +662,9 @@ function nextKeyHint(session){
 function statBarHTML(session){
   return `<div class="statbar">
     <div class="statchip"><b>${session.wpm()}</b><span>WPM</span></div>
-    <div class="statchip"><b>${session.accuracy()}%</b><span>নির্ভুলতা</span></div>
-    <div class="statchip"><b>${session.combo}</b><span>কম্বো</span></div>
-    <div class="statchip"><b>${session.wrong}</b><span>ভুল</span></div>
+    <div class="statchip"><b>${session.accuracy()}%</b><span>${L('নির্ভুলতা','Accuracy')}</span></div>
+    <div class="statchip"><b>${session.combo}</b><span>${L('কম্বো','Combo')}</span></div>
+    <div class="statchip"><b>${session.wrong}</b><span>${L('ভুল','Errors')}</span></div>
   </div>`;
 }
 
@@ -713,7 +726,7 @@ function showMistakeToast(msg){
   showMistakeToast._t = setTimeout(()=>t.classList.remove('show'), 1600);
 }
 function mistakeMsg(cur, typedKey, typedLayer){
-  if(typedLayer==='en') return `ভুল হলো — দরকার ছিল "${cur.char===' '?'Space':cur.char}"`;
+  if(typedLayer==='en') return L('ভুল হলো — দরকার ছিল ','Oops — expected ')+`"${cur.char===' '?'Space':cur.char}"`;
   const wantMod = cur.layer==='shift'?'Shift+':(cur.layer==='altgr'?'AltGr+':'');
   return `ভুল হলো — দরকার ছিল ${wantMod}${cur.key.toUpperCase()} (${cur.char})`;
 }
@@ -741,99 +754,157 @@ function refreshTypingUI(){
 }
 
 /* =========================================================================
-   ৯) SCREENS
+   ৯) ভাষা (UI language) + ইংরেজি পাঠ
+   ========================================================================= */
+function L(bn,en){ return state.lang==='en' ? en : bn; }
+const EN_LESSONS = [
+  { id:'e1', title:'Home Row — First Steps', keys:['a','s','d','f','j','k','l',';'],
+    desc:'Rest your fingers on the home row: left hand on A S D F, right hand on J K L ;. Feel the small bumps on F and J — after every key, your fingers return here.',
+    words:['sad','dad','lad','fall','ask','salad','flask','add','all','lass'] },
+  { id:'e2', title:'Home Row — G and H', keys:['g','h'],
+    desc:'G and H are pressed by your index fingers, stretching inward. Return to F and J after each press.',
+    words:['had','has','gas','hall','flag','glass','half','shall','dash','flash'] },
+  { id:'e3', title:'Top Row — E and I', keys:['e','i'],
+    desc:'Reach up with your middle fingers: left middle finger for E, right middle finger for I.',
+    words:['like','field','side','hide','file','seed','idea','fish','desk','life'] },
+  { id:'e4', title:'Top Row — R T Y U', keys:['r','t','y','u'],
+    desc:'Your index fingers cover R and T (left) and Y and U (right). These are some of the most used keys in English.',
+    words:['tree','true','rule','duty','your','fruit','start','treat','turtle','usual'] },
+  { id:'e5', title:'Top Row — Q W O P', keys:['q','w','o','p'],
+    desc:'The outer keys of the top row: ring and little fingers. Move slowly and keep your hand steady.',
+    words:['word','power','quiet','pool','work','proof','quote','low','pillow','swap'] },
+  { id:'e6', title:'Bottom Row', keys:['z','x','c','v','b','n','m',',','.'],
+    desc:'Drop your fingers to the bottom row. B is pressed with the left index finger, N and M with the right index finger.',
+    words:['cabin','move','number','zoom','next','vivid','bench','maze','common','box'] },
+  { id:'e7', title:'Capital Letters with Shift', keys:['Shift'],
+    desc:'Hold Shift with the little finger of the opposite hand, then press the letter. Left Shift for right-hand letters and right Shift for left-hand letters.',
+    words:['Dhaka','Bangladesh','English','Monday','Asia','March','Friday','Earth'] },
+  { id:'e8', title:'Numbers and Punctuation', keys:['1','2','3','4','5','6','7','8','9','0','?','!'],
+    desc:'Reach up to the number row without looking. Use Shift for symbols like ! and ?.',
+    words:['2026','1971','10','365','Hello,','yes.','why?','wow!'],
+    bonus:'I can type fast and correctly.' },
+];
+function LESSON_LIST(){ return state.lang==='en' ? EN_LESSONS : LESSONS; }
+function isUnlockedIn(list, idx){ if(idx===0) return true; return !!(DB.progress[list[idx-1].id]||{}).done; }
+function langHistory(){ return DB.history.filter(h=> (h.lang||'bn')===state.lang); }
+
+/* =========================================================================
+   ১০) SCREENS
    ========================================================================= */
 function screenHome(){
-  const totalLessons=LESSONS.length;
-  const done = LESSONS.filter(l=>(DB.progress[l.id]||{}).done).length;
-  const bestWpm = DB.history.reduce((m,h)=>Math.max(m,h.wpm||0),0);
+  const list=LESSON_LIST();
+  const done = list.filter(l=>(DB.progress[l.id]||{}).done).length;
+  const hist = langHistory();
+  const bestWpm = hist.reduce((m,h)=>Math.max(m,h.wpm||0),0);
   return `
   <section class="hero">
-    <div class="eyebrow">বাংলা (বিজয় ৫২) ও ইংরেজি টাইপিং শেখার প্ল্যাটফর্ম</div>
-    <h1 class="display">আঙুলের ডগায় বাংলা — ধাপে ধাপে বিজয় লেআউট শিখুন, তারপর গতি বাড়ান।</h1>
-    <p>একদম মৌলিক ধাপ থেকে শুরু — কোন ইংরেজি কী চাপলে কোন বাংলা অক্ষর আসে, কোন আঙুল ব্যবহার করবেন, সব দেখানো হবে সরাসরি কীবোর্ডের ওপর। শেখার পর নিজেকে যাচাই করুন টাইপিং-ফাইট মোডে — গতি, নির্ভুলতা আর ভুল বিশ্লেষণসহ।</p>
+    <div class="eyebrow">${L('বাংলা (বিজয় ৫২) টাইপিং শেখার প্ল্যাটফর্ম','English touch-typing platform')}</div>
+    <h1 class="display">${L('আঙুলের ডগায় বাংলা — ধাপে ধাপে বিজয় লেআউট শিখুন, তারপর গতি বাড়ান।','Learn to type without looking — step by step, then build your speed.')}</h1>
+    <p>${L('একদম মৌলিক ধাপ থেকে শুরু — কোন ইংরেজি কী চাপলে কোন বাংলা অক্ষর আসে, কোন আঙুল ব্যবহার করবেন, সব দেখানো হবে সরাসরি কীবোর্ডের ওপর। তারপর টাইপিং টেস্ট আর গেমে নিজেকে যাচাই করুন।',
+      'Start from the home row and learn every key with the right finger — the on-screen keyboard shows you exactly what to press. Then check your speed with typing tests and have fun with the typing game.')}</p>
     <div class="ctas">
-      <button class="btn btn-primary" data-go="lessons">শেখা শুরু করি →</button>
-      <button class="btn btn-ghost" data-go="test">টাইপিং টেস্ট দিই</button>
-      <button class="btn btn-ghost" data-go="arcade">🎮 গেম খেলি</button>
+      <button class="btn btn-primary" data-go="lessons">${L('শেখা শুরু করি →','Start learning →')}</button>
+      <button class="btn btn-ghost" data-go="test">${L('টাইপিং টেস্ট দিই','Take a typing test')}</button>
+      <button class="btn btn-ghost" data-go="arcade">🎮 ${L('গেম খেলি','Play the game')}</button>
     </div>
   </section>
   <div class="stripbox">
-    <div class="stat"><b>${done}/${totalLessons}</b><span>পাঠ সম্পন্ন</span></div>
-    <div class="stat"><b>${bestWpm}</b><span>সর্বোচ্চ WPM</span></div>
-    <div class="stat"><b>${DB.history.length}</b><span>মোট অনুশীলন সেশন</span></div>
-    <div class="stat"><b>২</b><span>ভাষা — বাংলা ও English</span></div>
+    <div class="stat"><b>${done}/${list.length}</b><span>${L('পাঠ সম্পন্ন','Lessons completed')}</span></div>
+    <div class="stat"><b>${bestWpm}</b><span>${L('সর্বোচ্চ WPM','Best WPM')}</span></div>
+    <div class="stat"><b>${hist.length}</b><span>${L('মোট অনুশীলন সেশন','Practice sessions')}</span></div>
+    <div class="stat"><b>${L('২','2')}</b><span>${L('ভাষা — বাংলা ও English','Languages — Bangla & English')}</span></div>
   </div>
   <div class="grid cols-3">
-    <div class="card feature"><span class="num">০১</span><h3>কী → অক্ষর, চোখের সামনে</h3><p>প্রতিটি ধাপে ভার্চুয়াল কীবোর্ডে ঠিক যে কী চাপতে হবে সেটা আলোকিত হয়ে থাকে, সাথে কোন আঙুল ব্যবহার করবেন তার রং-কোড।</p></div>
-    <div class="card feature"><span class="num">০২</span><h3>আসল শব্দ দিয়ে অনুশীলন</h3><p>শুধু এলোমেলো অক্ষর নয় — প্রতিটি পাঠে আছে প্রকৃত বাংলা শব্দ, যাতে হাতের সাথে সাথে মনও শিখে যায়।</p></div>
-    <div class="card feature"><span class="num">০৩</span><h3>গতি, ভুল ও সংশোধন</h3><p>প্র্যাকটিস মোডে প্রতিটি সেশনের WPM, নির্ভুলতা আর কোন কী-তে সবচেয়ে বেশি ভুল হচ্ছে তা ট্র্যাক হয়, সাথে সংশোধনের পরামর্শ।</p></div>
+    <div class="card feature"><span class="num">01</span><h3>${L('কী → অক্ষর, চোখের সামনে','See every key')}</h3><p>${L('প্রতিটি ধাপে ভার্চুয়াল কীবোর্ডে ঠিক যে কী চাপতে হবে সেটা আলোকিত হয়ে থাকে, সাথে কোন আঙুল ব্যবহার করবেন তার রং-কোড।','The next key lights up on the on-screen keyboard, colour-coded by the finger you should use.')}</p></div>
+    <div class="card feature"><span class="num">02</span><h3>${L('আসল শব্দ দিয়ে অনুশীলন','Practise with real words')}</h3><p>${L('প্রতিটি পাঠে আছে প্রকৃত বাংলা শব্দ, যাতে হাতের সাথে সাথে মনও শিখে যায়।','Every lesson uses real words, so your hands and your mind learn together.')}</p></div>
+    <div class="card feature"><span class="num">03</span><h3>${L('টেস্ট, গেম ও পরিসংখ্যান','Tests, game & stats')}</h3><p>${L('সময়ভিত্তিক ও শব্দভিত্তিক টেস্ট, শব্দ বৃষ্টি গেম, আর WPM ও ভুলের পূর্ণ হিসাব।','Timed and word-count tests, the Word Rain game, and full tracking of your WPM and mistakes.')}</p></div>
   </div>
   <section style="margin-top:34px;">
-    <h2 class="section-title">কীভাবে কাজ করে</h2>
-    <p class="section-sub">চারটি ধাপে পুরো বিজয় লেআউট রপ্ত করবেন।</p>
+    <h2 class="section-title">${L('কীভাবে কাজ করে','How it works')}</h2>
+    <p class="section-sub">${L('চারটি ধাপে দক্ষ টাইপিস্ট হয়ে উঠুন।','Become a confident typist in four steps.')}</p>
     <div class="grid cols-2">
-      <div class="card"><b style="color:var(--gold)">ধাপ ১ · শিখুন</b><p class="muted" style="margin-top:8px;">হোম রো থেকে শুরু করে ধীরে ধীরে পুরো কীবোর্ড — প্রতিটি নতুন কী এক এক করে পরিচয় করানো হয়।</p></div>
-      <div class="card"><b style="color:var(--gold)">ধাপ ২ · অনুশীলন করুন</b><p class="muted" style="margin-top:8px;">প্রতিটি পাঠে বাস্তব বাংলা শব্দ টাইপ করুন, ভুল হলে সাথে সাথে বোঝানো হয় কী চাপা উচিত ছিল।</p></div>
-      <div class="card"><b style="color:var(--gold)">ধাপ ৩ · গতি যাচাই করুন</b><p class="muted" style="margin-top:8px;">টাইপিং-ফাইট মোডে সময়ের বিপরীতে টাইপ করুন — কম্বো, স্কোর আর এনার্জি বার সহ।</p></div>
-      <div class="card"><b style="color:var(--gold)">ধাপ ৪ · অগ্রগতি দেখুন</b><p class="muted" style="margin-top:8px;">পরিসংখ্যান পাতায় দেখুন সময়ের সাথে আপনার গতি কতটা বেড়েছে, আর কোন কী-গুলো আরও অনুশীলন দরকার।</p></div>
+      <div class="card"><b style="color:var(--gold)">${L('ধাপ ১ · শিখুন','Step 1 · Learn')}</b><p class="muted" style="margin-top:8px;">${L('হোম রো থেকে শুরু করে ধীরে ধীরে পুরো কীবোর্ড।','Begin with the home row and add new keys one lesson at a time.')}</p></div>
+      <div class="card"><b style="color:var(--gold)">${L('ধাপ ২ · অনুশীলন করুন','Step 2 · Practise')}</b><p class="muted" style="margin-top:8px;">${L('ভুল হলে সাথে সাথে বোঝানো হয় কী চাপা উচিত ছিল।','Mistakes are explained instantly so you know which key was right.')}</p></div>
+      <div class="card"><b style="color:var(--gold)">${L('ধাপ ৩ · টেস্ট দিন','Step 3 · Test')}</b><p class="muted" style="margin-top:8px;">${L('১, ২ বা ৫ মিনিটের টেস্ট অথবা নির্দিষ্ট শব্দের টেস্ট।','Take a 1, 2 or 5 minute test, or a fixed-length word test.')}</p></div>
+      <div class="card"><b style="color:var(--gold)">${L('ধাপ ৪ · খেলুন','Step 4 · Play')}</b><p class="muted" style="margin-top:8px;">${L('শব্দ বৃষ্টি গেমে মজা করে গতি বাড়ান।','Build speed while having fun in the Word Rain game.')}</p></div>
     </div>
   </section>`;
 }
 
+function keyLabel(k){
+  if(k==='Shift') return 'Shift';
+  if(k.startsWith('@')) return 'AltGr+'+k.slice(1).toUpperCase();
+  return k.toUpperCase();
+}
 function screenLessons(){
+  const list=LESSON_LIST();
   let rows='';
-  LESSONS.forEach((l,idx)=>{
-    const unlocked = isUnlocked(idx);
+  list.forEach((l,idx)=>{
+    const unlocked = isUnlockedIn(list, idx);
     const prog = DB.progress[l.id]||{};
-    const keychips = l.keys.map(k=>`<span class="keychip">${k.replace('@','AltGr+').toUpperCase()}</span>`).join('');
+    const keychips = l.keys.map(k=>`<span class="keychip">${keyLabel(k)}</span>`).join('');
     rows += `<div class="lesson-row ${unlocked?'':'locked'} ${prog.done?'done':''}" ${unlocked?`data-lesson="${idx}"`:''}>
       <div class="lesson-num">${prog.done?'✓':idx+1}</div>
       <div class="lesson-body">
         <h3>${l.title}</h3>
-        <p>${unlocked? (l.words.length+' শব্দ অনুশীলন') : 'আগের পাঠ শেষ করলে খুলবে'}</p>
+        <p>${unlocked? (l.words.length+L(' শব্দ অনুশীলন',' practice words')) : L('আগের পাঠ শেষ করলে খুলবে','Complete the previous lesson to unlock')}</p>
         <div class="lesson-keys">${keychips}</div>
       </div>
-      <div class="lesson-wpm">${prog.done?`<b>${prog.bestWpm}</b>সেরা WPM`:''}</div>
+      <div class="lesson-wpm">${prog.done?`<b>${prog.bestWpm}</b>${L('সেরা WPM','best WPM')}`:''}</div>
     </div>`;
   });
   return `
-    <h2 class="section-title">শেখার পাঠ</h2>
-    <p class="section-sub">একটার পর একটা ধাপ। প্রতিটি পাঠ শেষ করলেই পরেরটা খুলে যাবে — কোনো তাড়া নেই।</p>
+    <h2 class="section-title">${L('শেখার পাঠ — বাংলা (বিজয় ৫২)','Lessons — English')}</h2>
+    <p class="section-sub">${L('একটার পর একটা ধাপ। প্রতিটি পাঠ শেষ করলেই পরেরটা খুলে যাবে — কোনো তাড়া নেই।','One step at a time. Finish a lesson to unlock the next one — there is no rush.')}</p>
     ${rows}`;
 }
 
 function screenLessonIntro(idx){
-  const l = LESSONS[idx];
-  const nkHtml = l.keys.map(k=>{
-    const altgr = k.startsWith('@');
-    const rawKey = altgr? k.slice(1): k.toLowerCase();
-    const isShift = !altgr && k===k.toUpperCase() && k.match(/[A-Z]/);
-    const km = KEYMAP[rawKey];
-    let bn='', label=rawKey.toUpperCase();
-    if(altgr){ bn=km.altgr; label='AltGr+'+rawKey.toUpperCase(); }
-    else if(isShift){ bn=km.shift; label='Shift+'+rawKey.toUpperCase(); }
-    else { bn=km.base; label=rawKey.toUpperCase(); }
-    const fi = FINGER[rawKey];
-    return `<div class="nk-card"><div class="en">${label}</div><div class="arrowbn">${bn}</div><div class="fname" style="color:${FINGER_COLOR[fi]}">${FINGER_NAME[fi]}</div></div>`;
-  }).join('');
-  const wl = l.words.map(([code,gloss])=>{
-    const toks=parseCode(code); const bn=toks.map(tokenChar).join('');
-    return `<div class="wl-chip">${bn}<small>${gloss.split('—')[1]||''}</small></div>`;
-  }).join('');
+  const list=LESSON_LIST(); const l = list[idx];
+  let nkHtml, wl;
+  if(state.lang==='en'){
+    nkHtml = l.keys.map(k=>{
+      if(k==='Shift') return `<div class="nk-card"><div class="en">SHIFT</div><div class="arrowbn">⇧</div><div class="fname" style="color:${FINGER_COLOR[0]}">Little fingers</div></div>`;
+      const r = EN_REVERSE[k]||{key:k}; const fi = FINGER[r.key]!==undefined?FINGER[r.key]:8;
+      return `<div class="nk-card"><div class="en">KEY</div><div class="arrowbn enfont">${k.toUpperCase()}</div><div class="fname" style="color:${FINGER_COLOR[fi]}">${FINGER_NAME_EN[fi]}</div></div>`;
+    }).join('');
+    wl = l.words.map(w=>`<div class="wl-chip enfont">${w}</div>`).join('');
+  } else {
+    nkHtml = l.keys.map(k=>{
+      const altgr = k.startsWith('@');
+      const rawKey = altgr? k.slice(1): k.toLowerCase();
+      const isShift = !altgr && k===k.toUpperCase() && k.match(/[A-Z]/);
+      const km = KEYMAP[rawKey];
+      let bn='', label=rawKey.toUpperCase();
+      if(altgr){ bn=km.altgr; label='AltGr+'+rawKey.toUpperCase(); }
+      else if(isShift){ bn=km.shift; label='Shift+'+rawKey.toUpperCase(); }
+      else { bn=km.base; label=rawKey.toUpperCase(); }
+      const fi = FINGER[rawKey];
+      return `<div class="nk-card"><div class="en">${label}</div><div class="arrowbn">${bn}</div><div class="fname" style="color:${FINGER_COLOR[fi]}">${FINGER_NAME[fi]}</div></div>`;
+    }).join('');
+    wl = l.words.map(([code,gloss])=>{
+      const bn=parseCode(code).map(tokenChar).join('');
+      return `<div class="wl-chip">${bn}<small>${gloss.split('—')[1]||''}</small></div>`;
+    }).join('');
+  }
   return `
-  <button class="btn btn-ghost" data-go="lessons" style="margin-bottom:18px;">← সব পাঠ</button>
-  <div class="pill">পাঠ ${idx+1} / ${LESSONS.length}</div>
+  <button class="btn btn-ghost" data-go="lessons" style="margin-bottom:18px;">← ${L('সব পাঠ','All lessons')}</button>
+  <div class="pill">${L('পাঠ','Lesson')} ${idx+1} / ${list.length}</div>
   <h2 class="section-title">${l.title}</h2>
   <p class="section-sub">${l.desc}</p>
   <div class="newkeys-strip">${nkHtml}</div>
-  <h3 style="margin:26px 0 4px;font-size:16px;color:var(--text-dim);">এই পাঠে যেসব শব্দ অনুশীলন করবেন</h3>
+  <h3 style="margin:26px 0 4px;font-size:16px;color:var(--text-dim);">${L('এই পাঠে যেসব শব্দ অনুশীলন করবেন','Words you will practise in this lesson')}</h3>
   <div class="wordlist-preview">${wl}</div>
-  <button class="btn btn-primary" style="margin-top:22px;" data-start-lesson="${idx}">অনুশীলন শুরু করি →</button>
+  <button class="btn btn-primary" style="margin-top:22px;" data-start-lesson="${idx}">${L('অনুশীলন শুরু করি →','Start practice →')}</button>
   `;
 }
 
 function buildLessonItems(l){
+  if(state.lang==='en'){
+    const items = l.words.map(w=>({tokens:enTokens(w)}));
+    if(l.bonus) l.bonus.split(' ').forEach(w=>items.push({tokens:enTokens(w)}));
+    return items;
+  }
   const items = l.words.map(([code,gloss])=>({tokens:parseCode(code), gloss}));
   if(l.bonus){ items.push({tokens:parseCode(l.bonus[0]), gloss:l.bonus[1]}); }
   return items;
@@ -841,128 +912,141 @@ function buildLessonItems(l){
 
 function screenTypingShell(title, subtitle, backAction){
   return `
-  <button class="btn btn-ghost" data-go="${backAction}" style="margin-bottom:14px;">← পেছনে</button>
+  <button class="btn btn-ghost" data-go="${backAction}" style="margin-bottom:14px;">← ${L('পেছনে','Back')}</button>
   <div class="practice-head">
     <div><h2 class="section-title" style="margin-bottom:2px;">${title}</h2><p class="muted" style="margin:0;">${subtitle}</p></div>
     <div id="statbarWrap"></div>
   </div>
   <div class="energywrap">
     <div class="energybar"><div class="progressfill" id="progFill" style="width:0%"></div></div>
-    <div class="energylabels"><span>অগ্রগতি</span><span id="progLabel"></span></div>
+    <div class="energylabels"><span>${L('অগ্রগতি','Progress')}</span><span id="progLabel"></span></div>
   </div>
   <div id="nextHint"></div>
   <div class="typebox" id="typebox"></div>
   <div class="kbwrap">
     <div class="kbtoolbar">
       <div class="legend">
-        <span><span class="dot" style="background:var(--gold)"></span>বর্তমান কী</span>
-        <span><span class="dot" style="background:var(--green)"></span>সঠিক</span>
-        <span><span class="dot" style="background:var(--red)"></span>ভুল</span>
+        <span><span class="dot" style="background:var(--gold)"></span>${L('বর্তমান কী','Current key')}</span>
+        <span><span class="dot" style="background:var(--green)"></span>${L('সঠিক','Correct')}</span>
+        <span><span class="dot" style="background:var(--red)"></span>${L('ভুল','Wrong')}</span>
       </div>
-      <button class="togglebtn" id="altgrToggle">AltGr চার্ট ${state.showAltgr?'লুকান':'দেখান'}</button>
+      ${state.lang==='en'?'':`<button class="togglebtn" id="altgrToggle">AltGr চার্ট ${state.showAltgr?'লুকান':'দেখান'}</button>`}
     </div>
     <div id="kbHolder"></div>
   </div>
   <div class="toast" id="toast"></div>
-  <p class="muted" style="margin-top:16px;font-size:13px;">ডেস্কটপ কীবোর্ডে টাইপ করুন, অথবা ওপরের ভার্চুয়াল কীবোর্ডে ট্যাপ করুন। ভুল হলে Backspace চেপে ঠিক করে নিতে পারবেন।</p>
+  <p class="muted" style="margin-top:16px;font-size:13px;">${L('ডেস্কটপ কীবোর্ডে টাইপ করুন, অথবা ভার্চুয়াল কীবোর্ডে ট্যাপ করুন। ভুল হলে Backspace চেপে ঠিক করে নিতে পারবেন।','Type on your keyboard or tap the on-screen keyboard. Press Backspace to fix a mistake.')}</p>
   `;
 }
 
 function screenResults(kind, summary, label, onNext){
-  const mistakeEntries = Object.entries(summary.mistakes).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const mistakeEntries = Object.entries(summary.mistakes||{}).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const mHtml = mistakeEntries.length ? mistakeEntries.map(([k,c])=>{
-    const km=KEYMAP[k];
-    const tip = km ? `${k.toUpperCase()} কী চাপলে <b>${km.base}</b> আসে, Shift+${k.toUpperCase()} চাপলে <b>${km.shift}</b>` : '';
-    return `<div class="mistake-row"><div class="badge">${k.toUpperCase()}</div><div class="txt">${tip}</div><div class="cnt">${c} বার ভুল</div></div>`;
-  }).join('') : `<p class="muted">চমৎকার — কোনো ভুল হয়নি!</p>`;
+    let badge=k.toUpperCase(), tip='';
+    if(state.lang==='en'){ badge = k===' '?'␣':k; tip = `Practise the <b>${k===' '?'Space':k}</b> key slowly a few more times.`; }
+    else { const km=KEYMAP[k]; tip = km ? `${k.toUpperCase()} কী চাপলে <b>${km.base}</b> আসে, Shift+${k.toUpperCase()} চাপলে <b>${km.shift}</b>` : ''; }
+    return `<div class="mistake-row"><div class="badge">${badge}</div><div class="txt">${tip}</div><div class="cnt">${c} ${L('বার ভুল','mistakes')}</div></div>`;
+  }).join('') : `<p class="muted">${L('চমৎকার — কোনো ভুল হয়নি!','Excellent — no mistakes!')}</p>`;
   return `
   <div class="card resultcard">
     <div class="muted">${label}</div>
     <div class="big">${summary.wpm} <span style="font-size:22px;color:var(--text-dim);">WPM</span></div>
     <div class="result-grid">
-      <div class="rc"><b>${summary.accuracy}%</b><span>নির্ভুলতা</span></div>
-      <div class="rc"><b>${summary.correct}</b><span>সঠিক কী-স্ট্রোক</span></div>
-      <div class="rc"><b>${summary.maxCombo}</b><span>সর্বোচ্চ কম্বো</span></div>
-      <div class="rc"><b>${summary.timeSec}s</b><span>সময়</span></div>
+      <div class="rc"><b>${summary.accuracy}%</b><span>${L('নির্ভুলতা','Accuracy')}</span></div>
+      <div class="rc"><b>${summary.correct}</b><span>${L('সঠিক কী-স্ট্রোক','Correct keystrokes')}</span></div>
+      <div class="rc"><b>${summary.maxCombo}</b><span>${L('সর্বোচ্চ কম্বো','Best combo')}</span></div>
+      <div class="rc"><b>${summary.timeSec}s</b><span>${L('সময়','Time')}</span></div>
     </div>
-    <h3 style="text-align:left;font-size:16px;margin:22px 0 10px;">ভুল বিশ্লেষণ ও সংশোধন</h3>
+    <h3 style="text-align:left;font-size:16px;margin:22px 0 10px;">${L('ভুল বিশ্লেষণ ও সংশোধন','Mistake analysis')}</h3>
     <div style="text-align:left;">${mHtml}</div>
     <div style="margin-top:26px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button class="btn btn-primary" id="resultNext">${onNext}</button>
-      <button class="btn btn-ghost" data-go="lessons">সব পাঠ দেখি</button>
-      <button class="btn btn-ghost" data-go="test">টাইপিং টেস্ট</button>
-      <button class="btn btn-ghost" data-go="arcade">🎮 গেম</button>
+      <button class="btn btn-ghost" data-go="lessons">${L('সব পাঠ দেখি','All lessons')}</button>
+      <button class="btn btn-ghost" data-go="test">${L('টাইপিং টেস্ট','Typing test')}</button>
+      <button class="btn btn-ghost" data-go="arcade">🎮 ${L('গেম','Game')}</button>
     </div>
   </div>`;
 }
 
 function screenGameIntro(){
   return `
-  <h2 class="section-title">অনুশীলন যুদ্ধ — টাইপিং ফাইট</h2>
-  <p class="section-sub">শেখা সব শব্দ থেকে র‍্যান্ডম ২০টি শব্দ নিয়ে একটি রাউন্ড শুরু হবে। যত দ্রুত ও নিভুর্লভাবে টাইপ করবেন, স্কোর ও কম্বো তত বাড়বে। ভুল হলে এনার্জি বার কমে যাবে — কিন্তু থেমে থাকবেন না, টাইপ চালিয়ে যান!</p>
+  <h2 class="section-title">${L('অনুশীলন — টাইপিং ফাইট','Practice — Typing Fight')}</h2>
+  <p class="section-sub">${L('শেখা সব শব্দ থেকে র‍্যান্ডম ২০টি শব্দ নিয়ে একটি রাউন্ড শুরু হবে। যত দ্রুত ও নির্ভুলভাবে টাইপ করবেন, কম্বো তত বাড়বে।','A round of 20 random words from all lessons. The faster and more accurately you type, the higher your combo climbs.')}</p>
   <div class="grid cols-3" style="margin-bottom:26px;">
-    <div class="card feature"><span class="num">⚡</span><h3>কম্বো সিস্টেম</h3><p>টানা সঠিক টাইপ করলে কম্বো বাড়বে — একটা ভুলেই কম্বো রিসেট হয়ে যায়, ঠিক ফাইটিং গেমের মতো।</p></div>
-    <div class="card feature"><span class="num">🎯</span><h3>নির্ভুলতা ট্র্যাকিং</h3><p>প্রতিটি অক্ষর আলাদাভাবে ট্র্যাক হয় — শেষে জানতে পারবেন ঠিক কোন কী-তে সবচেয়ে বেশি ভুল হচ্ছে।</p></div>
-    <div class="card feature"><span class="num">📈</span><h3>ইতিহাস সংরক্ষণ</h3><p>প্রতিটি রাউন্ডের ফলাফল সংরক্ষিত থাকে পরিসংখ্যান পাতায়, যাতে অগ্রগতি বুঝতে পারেন।</p></div>
+    <div class="card feature"><span class="num">⚡</span><h3>${L('কম্বো সিস্টেম','Combo system')}</h3><p>${L('টানা সঠিক টাইপ করলে কম্বো বাড়বে — একটা ভুলেই কম্বো রিসেট।','Type correctly in a row to build your combo — one mistake resets it.')}</p></div>
+    <div class="card feature"><span class="num">🎯</span><h3>${L('নির্ভুলতা ট্র্যাকিং','Accuracy tracking')}</h3><p>${L('শেষে জানতে পারবেন ঠিক কোন কী-তে সবচেয়ে বেশি ভুল হচ্ছে।','At the end you will see exactly which keys you miss the most.')}</p></div>
+    <div class="card feature"><span class="num">📈</span><h3>${L('ইতিহাস সংরক্ষণ','Saved history')}</h3><p>${L('প্রতিটি রাউন্ডের ফলাফল পরিসংখ্যান পাতায় সংরক্ষিত থাকে।','Every round is saved on the Stats page so you can track your progress.')}</p></div>
   </div>
-  <button class="btn btn-primary" data-start-game="1">রাউন্ড শুরু করি →</button>
+  <button class="btn btn-primary" data-start-game="1">${L('রাউন্ড শুরু করি →','Start round →')}</button>
   `;
 }
 
 function pickGameWords(n){
-  const all=[];
-  LESSONS.forEach(l=> l.words.forEach(w=>all.push(w)) );
-  const picked=[];
-  const pool=[...all];
-  for(let i=0;i<n && pool.length;i++){
-    const idx=Math.floor(Math.random()*pool.length);
-    picked.push(pool.splice(idx,1)[0]);
+  const items=[];
+  if(state.lang==='en'){
+    const pool=[]; EN_LESSONS.forEach(l=>l.words.forEach(w=>pool.push(w)));
+    for(let i=0;i<n;i++) items.push({tokens:enTokens(randomFrom(Math.random()<0.5?pool:EN_WORDS))});
+    return items;
   }
-  return picked.map(([code,gloss])=>({tokens:parseCode(code), gloss}));
+  const pool=[...bnWordPool()];
+  for(let i=0;i<n && pool.length;i++){
+    const w=pool.splice(Math.floor(Math.random()*pool.length),1)[0];
+    items.push({tokens:parseCode(w[0]), gloss:w[1]});
+  }
+  return items;
 }
 
 function screenStats(){
-  const hist = DB.history.slice(0,15);
+  const all = langHistory();
+  const hist = all.slice(0,15);
   const histHtml = hist.length? hist.map(h=>{
     const d=new Date(h.date);
-    return `<div class="histrow"><span>${h.label}</span><span class="l">${d.toLocaleDateString('bn-BD')}</span><span><b style="color:var(--gold)">${h.wpm}</b> WPM · ${h.accuracy}%</span></div>`;
-  }).join('') : `<p class="muted">এখনো কোনো সেশন সম্পন্ন হয়নি — শেখা বা অনুশীলন শুরু করুন।</p>`;
+    return `<div class="histrow"><span>${h.label}</span><span class="l">${d.toLocaleDateString(L('bn-BD','en-GB'))}</span><span><b style="color:var(--gold)">${h.wpm}</b> WPM · ${h.accuracy}%</span></div>`;
+  }).join('') : `<p class="muted">${L('এখনো কোনো সেশন সম্পন্ন হয়নি — শেখা বা অনুশীলন শুরু করুন।','No sessions yet — start a lesson or a test.')}</p>`;
 
-  const mistakeArr = Object.entries(DB.mistakes).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const src = state.lang==='en' ? (DB.mistakesEn||{}) : DB.mistakes;
+  const mistakeArr = Object.entries(src).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const maxM = mistakeArr.length? mistakeArr[0][1] : 1;
   const mistakeHtml = mistakeArr.length ? mistakeArr.map(([k,c])=>{
     const km=KEYMAP[k];
-    return `<div class="barrow"><div class="lbl">${k.toUpperCase()} <span class="muted">(${km?km.base:''}/${km?km.shift:''})</span></div>
+    const lbl = state.lang==='en' ? (k===' '?'Space':k) : `${k.toUpperCase()} <span class="muted">(${km?km.base:''}/${km?km.shift:''})</span>`;
+    return `<div class="barrow"><div class="lbl">${lbl}</div>
       <div class="track"><div class="fill" style="width:${Math.round(c/maxM*100)}%"></div></div><div class="n">${c}</div></div>`;
-  }).join('') : `<p class="muted">এখনো কোনো ভুলের তথ্য নেই।</p>`;
+  }).join('') : `<p class="muted">${L('এখনো কোনো ভুলের তথ্য নেই।','No mistake data yet.')}</p>`;
 
-  const bestWpm = DB.history.reduce((m,h)=>Math.max(m,h.wpm||0),0);
-  const avgAcc = DB.history.length? Math.round(DB.history.reduce((s,h)=>s+h.accuracy,0)/DB.history.length):0;
-
+  const bestWpm = all.reduce((m,h)=>Math.max(m,h.wpm||0),0);
+  const avgAcc = all.length? Math.round(all.reduce((s,h)=>s+h.accuracy,0)/all.length):0;
+  const big = (v,l)=>`<div class="card"><b style="font-size:28px;color:var(--gold);">${v}</b><div class="muted">${l}</div></div>`;
   return `
-  <h2 class="section-title">পরিসংখ্যান</h2>
-  <p class="section-sub">আপনার অগ্রগতি ও সবচেয়ে বেশি ভুল হওয়া কী-গুলোর তালিকা।</p>
+  <h2 class="section-title">${L('পরিসংখ্যান — বাংলা','Statistics — English')}</h2>
+  <p class="section-sub">${L('আপনার অগ্রগতি ও সবচেয়ে বেশি ভুল হওয়া কী-গুলোর তালিকা।','Your progress and the keys you miss the most.')}</p>
   <div class="grid cols-3" style="margin-bottom:28px;">
-    <div class="card"><b style="font-size:28px;color:var(--gold);font-family:'Tiro Bangla',serif;">${bestWpm}</b><div class="muted">সর্বোচ্চ WPM</div></div>
-    <div class="card"><b style="font-size:28px;color:var(--gold);font-family:'Tiro Bangla',serif;">${avgAcc}%</b><div class="muted">গড় নির্ভুলতা</div></div>
-    <div class="card"><b style="font-size:28px;color:var(--gold);font-family:'Tiro Bangla',serif;">${DB.history.length}</b><div class="muted">মোট সেশন</div></div>
+    ${big(bestWpm,L('সর্বোচ্চ WPM','Best WPM'))}${big(avgAcc+'%',L('গড় নির্ভুলতা','Average accuracy'))}${big(all.length,L('মোট সেশন','Total sessions'))}
   </div>
   <div class="grid cols-2">
     <div class="card">
-      <h3 style="margin-top:0;font-size:16px;">সাম্প্রতিক সেশনসমূহ</h3>
+      <h3 style="margin-top:0;font-size:16px;">${L('সাম্প্রতিক সেশনসমূহ','Recent sessions')}</h3>
       ${histHtml}
     </div>
     <div class="card">
-      <h3 style="margin-top:0;font-size:16px;">সবচেয়ে বেশি ভুল হওয়া কী</h3>
+      <h3 style="margin-top:0;font-size:16px;">${L('সবচেয়ে বেশি ভুল হওয়া কী','Most missed keys')}</h3>
       ${mistakeHtml}
-      ${mistakeArr.length?`<p class="muted" style="font-size:12.5px;margin-top:14px;">টিপ: এই কী-গুলো ধীরে ধীরে, সচেতনভাবে কয়েকবার অনুশীলন করুন — গতি নয়, নির্ভুলতা আগে।</p>`:''}
+      ${mistakeArr.length?`<p class="muted" style="font-size:12.5px;margin-top:14px;">${L('টিপ: এই কী-গুলো ধীরে ধীরে, সচেতনভাবে কয়েকবার অনুশীলন করুন — গতি নয়, নির্ভুলতা আগে।','Tip: practise these keys slowly and carefully — accuracy first, speed later.')}</p>`:''}
     </div>
   </div>
   `;
 }
 
 function screenChart(){
-  function row(label, keys){
+  if(state.lang==='en'){
+    const legend = FINGER_NAME_EN.map((n,i)=>`<span class="fleg"><span class="dot" style="background:${FINGER_COLOR[i]}"></span>${n}</span>`).join('');
+    return `
+    <h2 class="section-title">Keyboard & Finger Chart</h2>
+    <p class="section-sub">The standard QWERTY layout. The coloured dot on each key shows which finger should press it. Keep your fingers on the home row (A S D F — J K L ;).</p>
+    <div class="card" style="margin-bottom:18px;display:flex;flex-wrap:wrap;gap:14px;font-size:13px;">${legend}</div>
+    <div class="kbwrap"><div id="kbHolderChart"></div></div>`;
+  }
+  function row(keys){
     return keys.map(k=>{
       const km=KEYMAP[k];
       return `<tr><td class="k">${k.toUpperCase()}</td><td class="bn">${km.base||'—'}</td><td class="bn">${km.shift||'—'}</td><td class="bn">${km.altgr||'—'}</td></tr>`;
@@ -974,10 +1058,10 @@ function screenChart(){
   <div class="tablewrap"><table class="chart-table">
     <thead><tr><th>কী</th><th>Base</th><th>Shift</th><th>AltGr</th></tr></thead>
     <tbody>
-      ${row('num',['1','2','3','4','5','6','7','8','9','0','-','='])}
-      ${row('top',['q','w','e','r','t','y','u','i','o','p','[',']','\\'])}
-      ${row('home',['a','s','d','f','g','h','j','k','l',';',"'"])}
-      ${row('bottom',['z','x','c','v','b','n','m',',','.','/'])}
+      ${row(['1','2','3','4','5','6','7','8','9','0','-','='])}
+      ${row(['q','w','e','r','t','y','u','i','o','p','[',']','\\'])}
+      ${row(['a','s','d','f','g','h','j','k','l',';',"'"])}
+      ${row(['z','x','c','v','b','n','m',',','.','/'])}
     </tbody>
   </table></div>
   <div class="kbwrap"><div id="kbHolderChart"></div></div>
@@ -988,7 +1072,7 @@ function screenChart(){
    ১০) MAIN RENDER
    ========================================================================= */
 function navHTML(){
-  const tabs=[['home','হোম'],['lessons','শিখুন'],['game','অনুশীলন'],['test','টেস্ট'],['arcade','গেম'],['stats','পরিসংখ্যান'],['chart','চার্ট']];
+  const tabs=[['home',L('হোম','Home')],['lessons',L('শিখুন','Learn')],['game',L('অনুশীলন','Practice')],['test',L('টেস্ট','Test')],['arcade',L('গেম','Game')],['stats',L('পরিসংখ্যান','Stats')],['chart',L('চার্ট','Chart')]];
   const map={lessonIntro:'lessons',lessonPractice:'lessons',lessonResult:'lessons',gamePlay:'game',gameResult:'game',testPlay:'test',testResult:'test',arcadePlay:'arcade'};
   const cur=map[state.screen]||state.screen;
   return tabs.map(([id,label])=>`<button class="${cur===id?'active':''}" data-go="${id}">${label}</button>`).join('');
@@ -996,10 +1080,13 @@ function navHTML(){
 function topbarHTML(){
   return `
   <div class="topbar">
-    <div class="brand" data-go="home"><div class="mark">বি</div><div class="name">টাইপ শিখি<small>BANGLA · ENGLISH TYPING</small></div></div>
+    <div class="brand" data-go="home"><div class="mark">${L('বি','T')}</div><div class="name">${L('টাইপ শিখি','TypeShikhi')}<small>BANGLA · ENGLISH TYPING</small></div></div>
     <nav class="tabs">${navHTML()}</nav>
     <div class="topbar-right">
-      <button class="iconbtn ${DB.sound?'on':''}" id="soundToggle" title="সাউন্ড">${DB.sound?'🔊':'🔇'}</button>
+      <div class="langswitch" title="Language / ভাষা">
+        <button class="${state.lang==='bn'?'on':''}" data-lang="bn">বাংলা</button><button class="${state.lang==='en'?'on':''}" data-lang="en">EN</button>
+      </div>
+      <button class="iconbtn ${DB.sound?'on':''}" id="soundToggle" title="${L('সাউন্ড','Sound')}">${DB.sound?'🔊':'🔇'}</button>
     </div>
   </div>`;
 }
@@ -1007,31 +1094,37 @@ function topbarHTML(){
 function render(){
   detachPhysicalKeyboard();
   stopTimers();
+  document.documentElement.lang = state.lang;
+  document.body.classList.toggle('lang-en', state.lang==='en');
+  document.title = L('টাইপ শিখি — বাংলা (বিজয় ৫২) ও ইংরেজি টাইপিং শেখার প্ল্যাটফর্ম','TypeShikhi — Learn English & Bangla Typing');
+  const list = LESSON_LIST();
+  if(state.lessonIdx >= list.length) state.lessonIdx = 0;
+  const lesson = list[state.lessonIdx];
   let body='';
   if(state.screen==='home') body=screenHome();
   else if(state.screen==='lessons') body=screenLessons();
   else if(state.screen==='lessonIntro') body=screenLessonIntro(state.lessonIdx);
-  else if(state.screen==='lessonPractice') body=screenTypingShell(LESSONS[state.lessonIdx].title, 'শব্দ অনুশীলন', 'lessonIntro');
-  else if(state.screen==='lessonResult') body=screenResults('lesson', state.lastSummary, LESSONS[state.lessonIdx].title, 'পরের পাঠে যাই →');
+  else if(state.screen==='lessonPractice') body=screenTypingShell(lesson.title, L('শব্দ অনুশীলন','Word practice'), 'lessonIntro');
+  else if(state.screen==='lessonResult') body=screenResults('lesson', state.lastSummary, lesson.title, L('পরের পাঠে যাই →','Next lesson →'));
   else if(state.screen==='game') body=screenGameIntro();
-  else if(state.screen==='gamePlay') body=screenTypingShell('টাইপিং ফাইট — রাউন্ড চলছে', '২০টি শব্দ, যত দ্রুত ও নিভুর্লভাবে সম্ভব', 'game');
-  else if(state.screen==='gameResult') body=screenResults('game', state.lastSummary, 'রাউন্ড ফলাফল', 'নতুন রাউন্ড →');
+  else if(state.screen==='gamePlay') body=screenTypingShell(L('টাইপিং ফাইট — রাউন্ড চলছে','Typing Fight — round in progress'), L('২০টি শব্দ, যত দ্রুত ও নির্ভুলভাবে সম্ভব','20 words, as fast and accurately as you can'), 'game');
+  else if(state.screen==='gameResult') body=screenResults('game', state.lastSummary, L('রাউন্ড ফলাফল','Round result'), L('নতুন রাউন্ড →','New round →'));
   else if(state.screen==='stats') body=screenStats();
   else if(state.screen==='chart') body=screenChart();
   else if(state.screen==='test') body=screenTestIntro();
   else if(state.screen==='testPlay') body=screenTestPlay();
-  else if(state.screen==='testResult') body=screenResults('test', state.lastSummary, state.roundLabel, 'আবার টেস্ট দিই →');
+  else if(state.screen==='testResult') body=screenResults('test', state.lastSummary, state.roundLabel, L('আবার টেস্ট দিই →','Try again →'));
   else if(state.screen==='arcade') body=screenArcadeIntro();
   else if(state.screen==='arcadePlay') body=screenArcadePlay();
 
   document.getElementById('app').innerHTML = topbarHTML() + `<div class="content">${body}</div>` +
-    `<footer class="pagefoot">© ${new Date().getFullYear()} টাইপ শিখি — বাংলা ও ইংরেজি টাইপিং, মৌলিক থেকে দক্ষতা পর্যন্ত।</footer>`;
+    `<footer class="pagefoot">© ${new Date().getFullYear()} ${L('টাইপ শিখি — বাংলা ও ইংরেজি টাইপিং, মৌলিক থেকে দক্ষতা পর্যন্ত।','TypeShikhi — English & Bangla typing, from basics to mastery.')}</footer>`;
 
   bindGlobalNav();
 
   if(state.screen==='lessonIntro'){
     document.querySelectorAll('[data-start-lesson]').forEach(b=>b.addEventListener('click', e=>{
-      startLessonPractice(parseInt(e.target.getAttribute('data-start-lesson')));
+      startLessonPractice(parseInt(e.currentTarget.getAttribute('data-start-lesson')));
     }));
   }
   if(state.screen==='game'){
@@ -1047,7 +1140,7 @@ function render(){
   if(state.screen==='lessonResult'){
     document.getElementById('resultNext').addEventListener('click', ()=>{
       const nextIdx = state.lessonIdx+1;
-      if(nextIdx < LESSONS.length) go('lessonIntro',{lessonIdx:nextIdx});
+      if(nextIdx < list.length) go('lessonIntro',{lessonIdx:nextIdx});
       else go('lessons');
     });
   }
@@ -1055,14 +1148,11 @@ function render(){
     document.getElementById('resultNext').addEventListener('click', ()=> startGameRound() );
   }
   if(state.screen==='chart'){
-    document.getElementById('kbHolderChart').innerHTML = renderKeyboard(null,{showAltgr:true});
+    document.getElementById('kbHolderChart').innerHTML = renderKeyboard(null,{showAltgr:true, lang:state.lang});
   }
   if(state.screen==='lessons'){
     document.querySelectorAll('[data-lesson]').forEach(row=>{
-      row.addEventListener('click', e=>{
-        const idx = parseInt(row.getAttribute('data-lesson'));
-        go('lessonIntro',{lessonIdx:idx});
-      });
+      row.addEventListener('click', ()=> go('lessonIntro',{lessonIdx:parseInt(row.getAttribute('data-lesson'))}) );
     });
   }
 }
@@ -1070,15 +1160,22 @@ function bindGlobalNav(){
   document.querySelectorAll('[data-go]').forEach(el=>{
     el.addEventListener('click', ()=> go(el.getAttribute('data-go')) );
   });
+  document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click', ()=>{
+    const lang=b.getAttribute('data-lang'); if(lang===state.lang) return;
+    state.lang=lang; DB.lang=lang; saveDB(DB);
+    // চলমান সেশন অন্য ভাষার হলে সংশ্লিষ্ট মেনুতে ফিরে যাই
+    const back={lessonIntro:'lessons',lessonPractice:'lessons',lessonResult:'lessons',gamePlay:'game',gameResult:'game',testPlay:'test',testResult:'test',arcadePlay:'arcade'};
+    go(back[state.screen]||state.screen);
+  }));
   const st=document.getElementById('soundToggle');
   if(st) st.addEventListener('click', ()=>{ DB.sound=!DB.sound; saveDB(DB); render(); });
 }
 
 function startLessonPractice(idx){
-  const l = LESSONS[idx];
-  const items = buildLessonItems(l);
+  const l = LESSON_LIST()[idx];
   state.lessonIdx = idx;
-  state.session = new TypingSession(items, {
+  state.session = new TypingSession(buildLessonItems(l), {
+    lang: state.lang,
     onUpdate: refreshTypingUI,
     onMistake: (cur,k,layer)=> showMistakeToast(mistakeMsg(cur,k,layer)),
     onComplete: (summary)=>{
@@ -1092,13 +1189,13 @@ function startLessonPractice(idx){
   go('lessonPractice');
 }
 function startGameRound(){
-  const items = pickGameWords(20);
-  state.session = new TypingSession(items, {
+  state.session = new TypingSession(pickGameWords(20), {
+    lang: state.lang,
     onUpdate: refreshTypingUI,
     onMistake: (cur,k,layer)=> showMistakeToast(mistakeMsg(cur,k,layer)),
     onComplete: (summary)=>{
       sndDone();
-      recordSession('game', 'টাইপিং ফাইট রাউন্ড', summary);
+      recordSession('game', L('টাইপিং ফাইট রাউন্ড','Typing Fight round'), summary);
       state.lastSummary = summary;
       setTimeout(()=> go('gameResult'), 400);
     }
@@ -1112,6 +1209,7 @@ function setupTypingScreen(){
   const at=document.getElementById('altgrToggle');
   if(at) at.addEventListener('click', ()=>{ state.showAltgr=!state.showAltgr; refreshTypingUI(); at.textContent='AltGr চার্ট '+(state.showAltgr?'লুকান':'দেখান'); });
 }
+
 
 /* =========================================================================
    ১১) ইংরেজি কীবোর্ড সাপোর্ট
@@ -1157,19 +1255,19 @@ function optGroup(name, cur, opts){
   return `<div class="seg" data-opt="${name}">${opts.map(([v,l])=>`<button class="${String(cur)===String(v)?'on':''}" data-val="${v}">${l}</button>`).join('')}</div>`;
 }
 function screenTestIntro(){
+  const en = state.lang==='en';
   return `
-  <h2 class="section-title">টাইপিং টেস্ট</h2>
-  <p class="section-sub">ভাষা ও টেস্টের ধরন বেছে নিন। বাংলা টেস্ট বিজয় ৫২ লেআউটে, ইংরেজি টেস্ট সাধারণ QWERTY লেআউটে। ফলাফল পরিসংখ্যান পাতায় সংরক্ষিত হবে।</p>
+  <h2 class="section-title">${L('টাইপিং টেস্ট — বাংলা (বিজয় ৫২)','Typing Test — English')}</h2>
+  <p class="section-sub">${L('টেস্টের ধরন বেছে নিন। ইংরেজিতে টেস্ট দিতে ওপরের মেনু থেকে ভাষা EN করুন। ফলাফল পরিসংখ্যান পাতায় সংরক্ষিত হবে।','Choose a test type. To take the test in Bangla, switch the language to বাংলা in the top menu. Results are saved on the Stats page.')}</p>
   <div class="card testsetup">
-    <div class="optrow"><label>ভাষা</label>${optGroup('lang',TEST.lang,[['bn','বাংলা (বিজয়)'],['en','English']])}</div>
-    <div class="optrow"><label>টেস্টের ধরন</label>${optGroup('mode',TEST.mode,[['time','⏱ সময়ভিত্তিক'],['words','📄 শব্দ/অনুচ্ছেদভিত্তিক']])}</div>
+    <div class="optrow"><label>${L('টেস্টের ধরন','Test type')}</label>${optGroup('mode',TEST.mode,[['time',L('⏱ সময়ভিত্তিক','⏱ Timed')],['words',en?'📄 Paragraph':'📄 শব্দভিত্তিক']])}</div>
     ${TEST.mode==='time'
-      ? `<div class="optrow"><label>সময়</label>${optGroup('duration',TEST.duration,[[60,'১ মিনিট'],[120,'২ মিনিট'],[300,'৫ মিনিট']])}</div>`
-      : `<div class="optrow"><label>দৈর্ঘ্য</label>${optGroup('words',TEST.words,[[15,'ছোট'],[25,'মাঝারি'],[50,'বড়']])}</div>`}
+      ? `<div class="optrow"><label>${L('সময়','Duration')}</label>${optGroup('duration',TEST.duration,[[60,L('১ মিনিট','1 min')],[120,L('২ মিনিট','2 min')],[300,L('৫ মিনিট','5 min')]])}</div>`
+      : (en ? '' : `<div class="optrow"><label>দৈর্ঘ্য</label>${optGroup('words',TEST.words,[[15,'ছোট'],[25,'মাঝারি'],[50,'বড়']])}</div>`)}
     <p class="muted" style="font-size:13.5px;margin:6px 0 18px;">${TEST.mode==='time'
-      ? 'নির্দিষ্ট সময়ের মধ্যে যত বেশি সম্ভব সঠিকভাবে টাইপ করুন। প্রথম কী চাপার সাথে সাথে সময় শুরু হবে।'
-      : (TEST.lang==='en' ? 'একটি সম্পূর্ণ অনুচ্ছেদ টাইপ করুন — কত দ্রুত ও নির্ভুলভাবে শেষ করতে পারেন দেখুন।' : 'নির্দিষ্ট সংখ্যক শব্দ টাইপ করুন — কত দ্রুত ও নির্ভুলভাবে শেষ করতে পারেন দেখুন।')}</p>
-    <button class="btn btn-primary" id="startTestBtn">টেস্ট শুরু করি →</button>
+      ? L('নির্দিষ্ট সময়ের মধ্যে যত বেশি সম্ভব সঠিকভাবে টাইপ করুন। প্রথম কী চাপার সাথে সাথে সময় শুরু হবে।','Type as much as you can, as accurately as you can, before time runs out. The timer starts with your first key press.')
+      : L('নির্দিষ্ট সংখ্যক শব্দ টাইপ করুন — কত দ্রুত ও নির্ভুলভাবে শেষ করতে পারেন দেখুন।','Type a complete paragraph — see how fast and accurately you can finish it.')}</p>
+    <button class="btn btn-primary" id="startTestBtn">${L('টেস্ট শুরু করি →','Start test →')}</button>
   </div>`;
 }
 function bindTestIntro(){
@@ -1180,7 +1278,7 @@ function bindTestIntro(){
   document.getElementById('startTestBtn').addEventListener('click', startTest);
 }
 function buildTestItems(){
-  if(TEST.lang==='en'){
+  if(state.lang==='en'){
     if(TEST.mode==='words'){ return randomFrom(EN_PASSAGES).split(' ').map(w=>({tokens:enTokens(w)})); }
     const out=[]; for(let i=0;i<TEST.duration*2;i++) out.push({tokens:enTokens(randomFrom(EN_WORDS))}); return out;
   }
@@ -1188,8 +1286,8 @@ function buildTestItems(){
   const out=[]; for(let i=0;i<n;i++){ const w=randomFrom(pool); out.push({tokens:parseCode(w[0]), gloss:w[1]}); } return out;
 }
 function startTest(){
-  const lang=TEST.lang;
-  const label = (lang==='en'?'English':'বাংলা') + ' টেস্ট · ' + (TEST.mode==='time' ? fmtTime(TEST.duration)+' মিনিট' : 'শব্দভিত্তিক');
+  const lang=state.lang;
+  const label = L('বাংলা টেস্ট · ','English test · ') + (TEST.mode==='time' ? fmtTime(TEST.duration)+L(' মিনিট',' min') : L('শব্দভিত্তিক','Paragraph'));
   state.roundLabel = label;
   state.session = new TypingSession(buildTestItems(), {
     lang,
@@ -1213,7 +1311,7 @@ function startTest(){
   }
 }
 function screenTestPlay(){
-  const sub = TEST.mode==='time' ? `সময় বাকি: <b id="timerLabel" class="timer">${fmtTime(TEST.duration)}</b>` : 'সম্পূর্ণ লেখাটি টাইপ করুন';
+  const sub = TEST.mode==='time' ? `${L('সময় বাকি','Time left')}: <b id="timerLabel" class="timer">${fmtTime(TEST.duration)}</b>` : L('সম্পূর্ণ লেখাটি টাইপ করুন','Type the full text');
   return screenTypingShell(state.roundLabel, sub, 'test');
 }
 
@@ -1224,30 +1322,26 @@ const ARC = { lang:'bn', words:[], buffer:[], score:0, lives:5, level:1, destroy
 function screenArcadeIntro(){
   const best = (DB.arcadeBest||{});
   return `
-  <h2 class="section-title">🎮 শব্দ বৃষ্টি — টাইপিং গেম</h2>
-  <p class="section-sub">আকাশ থেকে শব্দ পড়ছে! মাটিতে পড়ার আগেই শব্দটি টাইপ করে ধ্বংস করুন। যত শব্দ ধ্বংস করবেন, লেভেল তত বাড়বে আর শব্দ তত দ্রুত পড়বে। ৫টি শব্দ মাটিতে পড়লে খেলা শেষ।</p>
+  <h2 class="section-title">🎮 ${L('শব্দ বৃষ্টি — টাইপিং গেম (বাংলা)','Word Rain — Typing Game (English)')}</h2>
+  <p class="section-sub">${L('আকাশ থেকে শব্দ পড়ছে! মাটিতে পড়ার আগেই শব্দটি টাইপ করে ধ্বংস করুন। যত শব্দ ধ্বংস করবেন, লেভেল তত বাড়বে আর শব্দ তত দ্রুত পড়বে। ৫টি শব্দ মাটিতে পড়লে খেলা শেষ।','Words are falling from the sky! Type each word before it hits the ground. The more words you destroy, the higher the level and the faster they fall. The game ends when 5 words reach the ground.')}</p>
   <div class="grid cols-3" style="margin-bottom:24px;">
-    <div class="card feature"><span class="num">⌨️</span><h3>শুধু টাইপ করুন</h3><p>যে শব্দের সাথে আপনার টাইপ মিলবে সেটিই স্বয়ংক্রিয়ভাবে টার্গেট হবে। ভুল কী চাপলে টাইপ রিসেট হবে।</p></div>
-    <div class="card feature"><span class="num">❤️</span><h3>৫টি জীবন</h3><p>প্রতিটি শব্দ মাটিতে পড়লে একটি জীবন কমবে। Esc চেপে খেলা থামাতে পারবেন।</p></div>
-    <div class="card feature"><span class="num">🏆</span><h3>সেরা স্কোর</h3><p>বাংলা: <b style="color:var(--gold)">${best.bn||0}</b> · English: <b style="color:var(--gold)">${best.en||0}</b></p></div>
+    <div class="card feature"><span class="num">⌨️</span><h3>${L('শুধু টাইপ করুন','Just type')}</h3><p>${L('যে শব্দের সাথে আপনার টাইপ মিলবে সেটিই স্বয়ংক্রিয়ভাবে টার্গেট হবে। ভুল কী চাপলে টাইপ রিসেট হবে।','The word that matches your typing is targeted automatically. A wrong key resets your input.')}</p></div>
+    <div class="card feature"><span class="num">❤️</span><h3>${L('৫টি জীবন','5 lives')}</h3><p>${L('প্রতিটি শব্দ মাটিতে পড়লে একটি জীবন কমবে। Esc চেপে খেলা থামাতে পারবেন।','You lose a life for every word that hits the ground. Press Esc to pause.')}</p></div>
+    <div class="card feature"><span class="num">🏆</span><h3>${L('সেরা স্কোর','Best score')}</h3><p><b style="color:var(--gold);font-size:22px;">${best[state.lang]||0}</b></p></div>
   </div>
-  <div class="card testsetup">
-    <div class="optrow"><label>ভাষা</label>${optGroup('lang',ARC.lang,[['bn','বাংলা (বিজয়)'],['en','English']])}</div>
-    <button class="btn btn-primary" id="startArcade" style="margin-top:8px;">খেলা শুরু করি →</button>
-  </div>`;
+  <button class="btn btn-primary" id="startArcade">${L('খেলা শুরু করি →','Start game →')}</button>`;
 }
 function bindArcadeIntro(){
-  document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{ ARC.lang=b.getAttribute('data-val'); render(); }));
-  document.getElementById('startArcade').addEventListener('click', ()=>{ state.session=null; go('arcadePlay'); });
+  document.getElementById('startArcade').addEventListener('click', ()=>{ state.session=null; ARC.lang=state.lang; go('arcadePlay'); });
 }
 function screenArcadePlay(){
   return `
-  <button class="btn btn-ghost" data-go="arcade" style="margin-bottom:14px;">← গেম মেনু</button>
+  <button class="btn btn-ghost" data-go="arcade" style="margin-bottom:14px;">← ${L('গেম মেনু','Game menu')}</button>
   <div class="arc-hud">
-    <div class="statchip"><b id="arcScore">0</b><span>স্কোর</span></div>
-    <div class="statchip"><b id="arcLevel">1</b><span>লেভেল</span></div>
-    <div class="statchip"><b id="arcLives">❤️❤️❤️❤️❤️</b><span>জীবন</span></div>
-    <button class="togglebtn" id="arcPause">⏸ বিরতি</button>
+    <div class="statchip"><b id="arcScore">0</b><span>${L('স্কোর','Score')}</span></div>
+    <div class="statchip"><b id="arcLevel">1</b><span>${L('লেভেল','Level')}</span></div>
+    <div class="statchip"><b id="arcLives">❤️❤️❤️❤️❤️</b><span>${L('জীবন','Lives')}</span></div>
+    <button class="togglebtn" id="arcPause">⏸ ${L('বিরতি','Pause')}</button>
   </div>
   <div class="arena" id="arena"><div class="ground"></div><div class="arc-overlay" id="arcOverlay"></div></div>
   <div class="arc-typed" id="arcTyped">&nbsp;</div>
@@ -1320,13 +1414,14 @@ function arcGameOver(){
   DB.arcadeBest = DB.arcadeBest||{};
   const isBest = ARC.score > (DB.arcadeBest[ARC.lang]||0);
   if(isBest) DB.arcadeBest[ARC.lang]=ARC.score;
-  recordSession('arcade', `শব্দ বৃষ্টি (${ARC.lang==='en'?'English':'বাংলা'}) · স্কোর ${ARC.score}`, summary);
+  summary.lang=ARC.lang;
+  recordSession('arcade', L('শব্দ বৃষ্টি · স্কোর ','Word Rain · score ')+ARC.score, summary);
   sndDone();
   const ov=document.getElementById('arcOverlay');
-  if(ov){ ov.classList.add('show'); ov.innerHTML=`<div><div class="muted">খেলা শেষ</div><div class="big">${ARC.score}</div>
-    <div class="muted">${isBest?'🏆 নতুন সেরা স্কোর!':'স্কোর'} · লেভেল ${ARC.level} · ${ARC.destroyed} শব্দ · ${summary.wpm} WPM · ${summary.accuracy}% নির্ভুল</div>
+  if(ov){ ov.classList.add('show'); ov.innerHTML=`<div><div class="muted">${L('খেলা শেষ','Game over')}</div><div class="big">${ARC.score}</div>
+    <div class="muted">${isBest?L('🏆 নতুন সেরা স্কোর!','🏆 New best score!'):L('স্কোর','Score')} · ${L('লেভেল','Level')} ${ARC.level} · ${ARC.destroyed} ${L('শব্দ','words')} · ${summary.wpm} WPM · ${summary.accuracy}% ${L('নির্ভুল','accuracy')}</div>
     <div style="margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-    <button class="btn btn-primary" id="arcAgain">আবার খেলি</button><button class="btn btn-ghost" data-go="arcade">মেনু</button></div></div>`;
+    <button class="btn btn-primary" id="arcAgain">${L('আবার খেলি','Play again')}</button><button class="btn btn-ghost" data-go="arcade">${L('মেনু','Menu')}</button></div></div>`;
     document.getElementById('arcAgain').addEventListener('click',()=>go('arcadePlay'));
     ov.querySelector('[data-go]').addEventListener('click',()=>go('arcade'));
   }
@@ -1335,11 +1430,12 @@ function arcTogglePause(){
   if(ARC.over) return;
   ARC.paused=!ARC.paused;
   const ov=document.getElementById('arcOverlay'); const pb=document.getElementById('arcPause');
-  if(pb) pb.textContent = ARC.paused?'▶ চালু':'⏸ বিরতি';
-  if(ov){ ov.classList.toggle('show',ARC.paused); ov.innerHTML = ARC.paused?'<div><div class="big" style="font-size:34px;">বিরতি</div><div class="muted">চালিয়ে যেতে Esc বা ▶ চাপুন</div></div>':''; }
+  if(pb) pb.textContent = ARC.paused?L('▶ চালু','▶ Resume'):L('⏸ বিরতি','⏸ Pause');
+  if(ov){ ov.classList.toggle('show',ARC.paused); ov.innerHTML = ARC.paused?`<div><div class="big" style="font-size:34px;">${L('বিরতি','Paused')}</div><div class="muted">${L('চালিয়ে যেতে Esc বা ▶ চাপুন','Press Esc or ▶ to continue')}</div></div>`:''; }
   if(!ARC.paused) ARC.last=performance.now();
 }
 function setupArcade(){
+  ARC.lang=state.lang;
   Object.assign(ARC,{words:[],buffer:[],score:0,lives:5,level:1,destroyed:0,keys:0,good:0,over:false,paused:false,start:Date.now(),last:performance.now(),spawnAt:0});
   document.getElementById('arcPause').addEventListener('click', arcTogglePause);
   ARC.handler=function(e){
